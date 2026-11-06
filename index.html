@@ -697,18 +697,84 @@
   </div>
 
   <script>
-    // Progressive enhancement: subtle "live review" timestamp ticker so the
-    // pending step feels active without changing the displayed statuses.
+    // ─────────────────────────────────────────────────────────────
+    // Persistent "In review" timer
+    // ─────────────────────────────────────────────────────────────
+    // The ORIGINAL verification start timestamp is stored ONCE (in localStorage)
+    // and reused on every page load, so the elapsed time survives refreshes,
+    // reopens and revisits — it never restarts from 00:00.
+    //
+    //   1. The timer keeps running after a refresh.              ✓
+    //   2. It never resets on refresh / reopen / revisit.       ✓
+    //   3. The original start timestamp is stored persistently. ✓
+    //   4. Elapsed = Date.now() - originalStart.                 ✓
+    //   5. Updated every second without moving the start point. ✓
+    //   6. Exact elapsed time preserved across reloads.        ✓
+    //   8. No new start timestamp is generated on load.         ✓
+    //   9. Only resets when status changes / new process.        ✓
+    //
+    // Note on (7): cross-device/cross-browser sync requires a shared
+    // backend/database, which this self-contained static dashboard does not
+    // have. localStorage gives reliable persistence per-browser/device. A
+    // backend can be added later if true cross-device sync is needed.
     (function () {
+      'use strict';
+
+      // Current verification session. If the reference id or the status ever
+      // changes (a new verification process / an explicit status change) the
+      // storage key changes too, which automatically starts a fresh timer.
+      var REF_ID = 'VD-2026-1106-AX9';
+      var STATUS = 'pending';
+      var KEY = 'exnessDemo.verificationStart:' + REF_ID + ':' + STATUS;
+
       var meta = document.querySelector('.step.is-active .step__meta');
       if (!meta) return;
-      var seconds = 0;
-      setInterval(function () {
-        seconds += 1;
-        var m = Math.floor(seconds / 60);
-        var s = seconds % 60;
-        meta.textContent = 'In review · ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-      }, 1000);
+
+      function readStart() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          if (raw) {
+            var ts = parseInt(raw, 10);
+            if (!isNaN(ts) && ts > 0) return ts;
+          }
+        } catch (e) { /* localStorage unavailable — fall back to in-memory */ }
+        return null;
+      }
+
+      function writeStart(ts) {
+        try { localStorage.setItem(KEY, String(ts)); } catch (e) {}
+      }
+
+      // (8) Do NOT create a new start timestamp on load if one already exists
+      // for this verification session — reuse the stored one.
+      var start = readStart();
+      if (!start) {
+        start = Date.now();
+        writeStart(start);
+      }
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      // (4) Elapsed time = current time − original start, so the value is exact
+      // regardless of refreshes or how long the page was closed. The starting
+      // point is never shifted.
+      function render() {
+        var elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
+        meta.textContent = 'In review · ' + pad(Math.floor(elapsed / 60)) + ':' + pad(elapsed % 60);
+      }
+
+      render();                                  // paint immediately, no 00:00 flash
+      setInterval(render, 1000);                 // (5) tick every second, same start
+
+      // (9) Explicit reset hook: clears the stored start so a new verification
+      // process / status change restarts the timer from zero.
+      // Usage from the console: window.resetVerificationTimer()
+      window.resetVerificationTimer = function () {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        start = Date.now();
+        writeStart(start);
+        render();
+      };
     })();
   </script>
 </body>
