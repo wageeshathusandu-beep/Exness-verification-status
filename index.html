@@ -624,6 +624,127 @@
     .demo-strip__text { flex: 1; min-width: 140px; }
     .demo-strip .btn  { padding: 8px 15px; font-size: 12.5px; }
 
+    /* ── Transaction cards (Deposit / Withdrawal) ─────────────────── */
+    .txn-card {
+      margin-top: 16px;
+      padding: clamp(18px,4vw,26px);
+      border-radius: var(--r);
+      background: var(--surf);
+      border: 1px solid var(--border);
+      box-shadow: var(--sh);
+    }
+
+    .txn-head {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .txn-title-row {
+      display: flex; align-items: center; gap: 11px;
+    }
+    .txn-icon {
+      flex: none; width: 40px; height: 40px;
+      border-radius: 11px;
+      display: grid; place-items: center;
+    }
+    .txn-icon--deposit {
+      background: var(--green-soft);
+      border: 1px solid rgba(16,185,129,.35);
+      color: var(--green);
+    }
+    .txn-icon--withdrawal {
+      background: rgba(245,185,66,.12);
+      border: 1px solid rgba(245,185,66,.32);
+      color: var(--amber);
+    }
+    .txn-label { font-size: clamp(14px,2.6vw,16px); font-weight: 600; }
+
+    .txn-body {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* Status info banner */
+    .txn-status-row {
+      display: flex; align-items: center; gap: 13px;
+      padding: 14px 16px;
+      border-radius: var(--r-sm);
+      background: var(--surf-hi);
+      border: 1px solid var(--border);
+    }
+    .txn-status-icon {
+      flex: none; width: 38px; height: 38px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+    }
+    .txn-status-icon--pending {
+      background: var(--amber-soft);
+      border: 1px solid rgba(245,185,66,.33);
+      color: var(--amber);
+      animation: glow-amber 2.6s var(--ease) infinite;
+    }
+    .txn-status-text { flex: 1; min-width: 0; }
+    .txn-status-label {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--txt-2);
+      font-weight: 600; margin-bottom: 3px;
+    }
+    .txn-status-val { font-size: 14px; font-weight: 600; color: var(--txt-0); }
+
+    /* Transaction detail row */
+    .txn-detail {
+      display: flex; flex-wrap: wrap;
+      gap: 8px;
+    }
+    .txn-chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      font-size: 12px; color: var(--txt-2);
+    }
+    .txn-chip b { color: var(--txt-0); font-weight: 600; }
+    .txn-chip svg { flex: none; color: var(--txt-2); }
+
+    /* Amount */
+    .txn-amount-row {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 12px 16px;
+      border-radius: var(--r-sm);
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+    }
+    .txn-amount-label { font-size: 11.5px; color: var(--txt-2); }
+    .txn-amount-val {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--txt-0);
+    }
+    .txn-amount-val.deposit-amt { color: var(--green); }
+    .txn-amount-val.withdrawal-amt { color: var(--amber); }
+    .txn-amount-currency {
+      font-size: 13px; font-weight: 500; color: var(--txt-2);
+      margin-left: 2px;
+    }
+
+    /* Demo notice strip inside txn cards */
+    .txn-demo-strip {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 10px 13px;
+      border-radius: var(--r-sm);
+      background: rgba(59,130,246,.05);
+      border: 1px dashed rgba(59,130,246,.24);
+      font-size: 11.5px; color: var(--txt-2); line-height: 1.44;
+    }
+    .txn-demo-strip svg { flex: none; margin-top: 1px; color: var(--blue); }
+    .txn-demo-strip b { color: var(--txt-1); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .txn-status-row { flex-wrap: wrap; }
+      .txn-amount-val { font-size: 19px; }
+    }
+
     /* ── Toast ────────────────────────────────────────────────────── */
     .toast {
       position: fixed;
@@ -848,7 +969,6 @@
       <div class="addr-uploaded" id="addrUploaded">
         <div class="addr-uploaded__top">
           <span class="addr-uploaded__label">Uploaded document</span>
-          <span class="demo-tag">Demo</span>
         </div>
 
         <div class="addr-uploaded__row">
@@ -1006,6 +1126,118 @@
     </div><!-- /addrDoneView -->
 
   </section><!-- /addressCard -->
+
+  <!-- ── Deposit ─────────────────────────────────────────────────── -->
+  <section class="txn-card reveal" aria-label="Deposit">
+    <div class="txn-head">
+      <div class="txn-title-row">
+        <div class="txn-icon txn-icon--deposit" aria-hidden="true">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v18"/>
+            <path d="m6 14 6 6 6-6"/>
+            <path d="M5 22h14"/>
+          </svg>
+        </div>
+        <span class="txn-label">Deposit</span>
+      </div>
+      <span class="pill pill--pending" id="depositPill">
+        <span class="pill__dot"></span>Pending
+      </span>
+    </div>
+
+    <div class="txn-body">
+      <div class="txn-status-row">
+        <div class="txn-status-icon txn-status-icon--pending" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div class="txn-status-text">
+          <div class="txn-status-label">Status</div>
+          <div class="txn-status-val" id="depositStatus">Pending</div>
+        </div>
+      </div>
+
+      <div class="txn-detail">
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Card payment
+        </span>
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span id="depositDate">10 November 2026, 2:42 PM</span>
+        </span>
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>
+          Ref <b id="depositRef">TXD-251106-DEP</b>
+        </span>
+      </div>
+
+      <div class="txn-amount-row">
+        <span class="txn-amount-label">Amount</span>
+        <span class="txn-amount-val deposit-amt" id="depositAmount">+2,500.00<span class="txn-amount-currency"> USD</span></span>
+      </div>
+
+      <div class="txn-demo-strip" id="depositDemoStrip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+        <span><b>DEMO</b> — sample transaction data for illustration only. Status, amount and date shown are not from a real backend record.</span>
+      </div>
+    </div>
+  </section><!-- /Deposit -->
+
+  <!-- ── Withdrawal ──────────────────────────────────────────────── -->
+  <section class="txn-card reveal" aria-label="Withdrawal">
+    <div class="txn-head">
+      <div class="txn-title-row">
+        <div class="txn-icon txn-icon--withdrawal" aria-hidden="true">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22V4"/>
+            <path d="m6 10 6-6 6 6"/>
+            <path d="M5 2h14"/>
+          </svg>
+        </div>
+        <span class="txn-label">Withdrawal</span>
+      </div>
+      <span class="pill pill--pending" id="withdrawalPill">
+        <span class="pill__dot"></span>Pending
+      </span>
+    </div>
+
+    <div class="txn-body">
+      <div class="txn-status-row">
+        <div class="txn-status-icon txn-status-icon--pending" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div class="txn-status-text">
+          <div class="txn-status-label">Status</div>
+          <div class="txn-status-val" id="withdrawalStatus">Pending</div>
+        </div>
+      </div>
+
+      <div class="txn-detail">
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"/></svg>
+          Wallet transfer
+        </span>
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span id="withdrawalDate">10 November 2026, 3:08 PM</span>
+        </span>
+        <span class="txn-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>
+          Ref <b id="withdrawalRef">TXW-251106-WDR</b>
+        </span>
+      </div>
+
+      <div class="txn-amount-row">
+        <span class="txn-amount-label">Amount</span>
+        <span class="txn-amount-val withdrawal-amt" id="withdrawalAmount">-1,000.00<span class="txn-amount-currency"> USD</span></span>
+      </div>
+
+      <div class="txn-demo-strip" id="withdrawalDemoStrip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+        <span><b>DEMO</b> — sample transaction data for illustration only. Status, amount and date shown are not from a real backend record.</span>
+      </div>
+    </div>
+  </section><!-- /Withdrawal -->
 
   <!-- ── Compact disclosure footer ──────────────────────────────── -->
   <footer class="footer reveal" role="contentinfo">
@@ -1333,11 +1565,11 @@
 
   function updateStatusUI(state) {
     if (state === "awaiting") {
-      setPill("Action Required", "pill--action");
-      summAddrIcon.className = "summ-icon blue";
-      summAddrIcon.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
-      infoAddrValue.textContent = "Awaiting upload";
-      infoAddrHint.textContent  = "Upload your proof of address to continue.";
+      setPill("Pending Verification", "pill--pending");
+      summAddrIcon.className = "summ-icon amber";
+      summAddrIcon.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+      infoAddrValue.textContent = "Pending Verification";
+      infoAddrHint.textContent  = "Document submitted — pending review.";
     } else if (state === "pending") {
       setPill("Pending Review", "pill--pending");
       summAddrIcon.className = "summ-icon amber";
@@ -1427,6 +1659,80 @@
   }
   init();
 
+})();
+
+/* ================================================================
+   Transaction status module (Deposit / Withdrawal)
+   --------------------------------------------------------------
+   In production, set TXN_BACKEND to your API endpoint. The UI will
+   fetch the REAL status for each transaction and only render
+   "pending" when the backend reports pending. With no backend
+   configured, clearly-labeled DEMO sample data is shown instead.
+================================================================ */
+(function () {
+  "use strict";
+
+  // Set to a real endpoint (e.g. "/api/transactions/last") in production.
+  // Leave "" to use DEMO sample data (clearly labeled in the UI).
+  var TXN_BACKEND = "";
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // DEMO sample data — clearly labeled in the UI via the demo strips.
+  var DEMO = {
+    deposit:   { status: "pending", amount: "+2,500.00", date: "10 November 2026, 2:42 PM", ref: "TXD-251106-DEP" },
+    withdrawal:{ status: "pending", amount: "-1,000.00", date: "10 November 2026, 3:08 PM", ref: "TXW-251106-WDR" }
+  };
+
+  function pillClass(status) {
+    status = (status || "").toLowerCase();
+    if (status === "pending")     return "pill--pending";
+    if (status === "completed" || status === "approved" || status === "success") return "pill--done";
+    if (status === "action" || status === "required") return "pill--action";
+    return "pill--pending";
+  }
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function setPill(el, status) {
+    if (!el) return;
+    el.className = "pill " + pillClass(status);
+    el.innerHTML = '<span class="pill__dot"></span><span>' + cap(status) + '</span>';
+  }
+
+  function applyTx(prefix, data) {
+    setPill($(prefix + "Pill"), data.status);
+    var st = $(prefix + "Status");    if (st)      st.textContent = cap(data.status);
+    var amt = $(prefix + "Amount");  if (amt)     amt.innerHTML = data.amount + '<span class="txn-amount-currency"> USD</span>';
+    var d = $(prefix + "Date");      if (d)       d.textContent = data.date;
+    var r = $(prefix + "Ref");       if (r)       r.textContent = data.ref;
+  }
+
+  function hideDemoStrip(prefix) {
+    var s = $(prefix + "DemoStrip");
+    if (s) s.style.display = "none";
+  }
+
+  function refreshTransactions() {
+    if (!TXN_BACKEND) return; // no backend → keep clearly-labeled DEMO data
+
+    fetch(TXN_BACKEND, { headers: { "Accept": "application/json" } })
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error("bad response")); })
+      .then(function(data){
+        // Only render a status the backend actually reports. Never invent
+        // "pending" — if the backend says "completed", show that.
+        if (data && data.deposit) {
+          applyTx("deposit", data.deposit);
+          hideDemoStrip("deposit");
+        }
+        if (data && data.withdrawal) {
+          applyTx("withdrawal", data.withdrawal);
+          hideDemoStrip("withdrawal");
+        }
+      })
+      .catch(function(){ /* keep DEMO on failure */ });
+  }
+
+  refreshTransactions();
 })();
 </script>
 </body>
