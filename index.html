@@ -585,8 +585,9 @@
 
     /* Dropzone */
     .dropzone {
+      display: block;
       position: relative;
-      border: 2px dashed var(--border-strong);
+      border: 2px dashed rgba(255, 255, 255, 0.22);
       border-radius: var(--radius-sm);
       padding: 34px 20px;
       text-align: center;
@@ -693,6 +694,15 @@
       background: var(--surface-strong);
       border: 1px solid var(--border);
     }
+    .preview-item__meta {
+      flex: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: var(--text-2);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
 
     .preview-item__remove {
       position: absolute;
@@ -725,6 +735,23 @@
       gap: 7px;
     }
 
+    /* Upload error banner */
+    .addr-error {
+      margin-top: 14px;
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(239, 68, 68, 0.10);
+      border: 1px solid rgba(239, 68, 68, 0.32);
+      color: #fca5a5;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .addr-error.show { display: flex; }
+    .addr-error svg { flex: none; margin-top: 1px; color: #fca5a5; }
+
     /* Buttons */
     .addr-actions {
       display: flex;
@@ -737,6 +764,7 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
+      position: relative;
       padding: 13px 26px;
       border-radius: 12px;
       font-size: 14.5px;
@@ -767,6 +795,27 @@
     }
     .btn--ghost { background: transparent; }
     .btn--ghost:hover { background: var(--surface-strong); }
+
+    /* Submit loading state */
+    .btn.is-loading { pointer-events: none; }
+    .btn.is-loading .btn-icon,
+    .btn.is-loading .btn-label,
+    .btn.is-loading .btn-counter { visibility: hidden; }
+    .spinner {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 17px;
+      height: 17px;
+      margin: -8.5px 0 0 -8.5px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    .btn.is-loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .btn-counter {
       font-size: 12px;
@@ -1029,6 +1078,18 @@
       .hero-top { gap: 10px; }
 
       .toast { width: calc(100vw - 24px); top: 12px; }
+
+      .preview-item__remove { width: 30px; height: 30px; }
+      .addr-actions .btn { padding: 12px 20px; font-size: 14px; }
+    }
+
+    @media (max-width: 420px) {
+      .preview-grid { grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
+      .dropzone { padding: 26px 16px; }
+      .addr-types { grid-template-columns: 1fr; }
+      .addr-meta__chip { font-size: 12px; padding: 7px 11px; }
+      .addr-actions { flex-direction: column; align-items: stretch; }
+      .addr-actions .btn { justify-content: center; width: 100%; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1186,7 +1247,7 @@
         </ul>
 
         <label class="dropzone" id="dropzone" for="fileInput" tabindex="0">
-          <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,application/pdf" hidden />
+          <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,application/pdf" hidden />
           <div class="dropzone__icon" aria-hidden="true">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
           </div>
@@ -1200,11 +1261,17 @@
           No documents added yet. Add at least one file to submit.
         </div>
 
+        <div class="addr-error" id="addrError" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
+          <span id="addrErrorMsg">Only JPG, JPEG, PNG and PDF files up to 10MB are accepted.</span>
+        </div>
+
         <div class="addr-actions">
           <button class="btn btn--primary" id="submitBtn" disabled>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            <span>Submit for Verification</span>
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <span class="btn-label">Submit for Verification</span>
             <span class="btn-counter" id="btnCounter" hidden>0</span>
+            <span class="spinner" aria-hidden="true"></span>
           </button>
           <button class="btn btn--ghost" id="clearBtn" disabled>Clear all</button>
         </div>
@@ -1216,8 +1283,8 @@
           <div class="addr-state__icon addr-state__icon--pending" aria-hidden="true">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
           </div>
-          <h3 class="addr-state__title">Pending Verification</h3>
-          <p class="addr-state__msg">Your address documents have been submitted and are currently under review.</p>
+          <h3 class="addr-state__title">Address Verification Submitted</h3>
+          <p class="addr-state__msg">Your documents are currently under review.</p>
 
           <div class="addr-meta">
             <span class="addr-meta__chip">
@@ -1396,6 +1463,8 @@
       var infoAddrTileIcon = $("infoAddrTile").querySelector(".info-tile__icon");
       var simulateApproveBtn = $("simulateApproveBtn");
       var resetBtn = $("resetBtn");
+      var addrError = $("addrError");
+      var addrErrorMsg = $("addrErrorMsg");
 
       /* ---------- Helpers ---------- */
       function genId() {
@@ -1440,6 +1509,15 @@
         clearTimeout(toastTimer);
       }
       toastClose.addEventListener("click", hideToast);
+
+      /* ---------- Inline upload error banner ---------- */
+      function showError(msg) {
+        if (addrErrorMsg) addrErrorMsg.textContent = msg;
+        if (addrError) addrError.classList.add("show");
+      }
+      function clearError() {
+        if (addrError) addrError.classList.remove("show");
+      }
 
       /* ---------- Thumbnail generation (small data URL, persisted) ---------- */
       function makeThumb(file) {
@@ -1490,14 +1568,14 @@
         var loop = function () {
           if (pending.length === 0) {
             renderPreviews();
-            if (rejected && oversized) {
-              showToast("Some files skipped", "Unsupported formats or files larger than 10MB were not added.");
-            } else if (rejected) {
-              showToast("Some files skipped", "Only JPG, PNG and PDF files are accepted.");
-            } else if (oversized) {
-              showToast("Some files skipped", "Files larger than 10MB were not added.");
+            if (rejected || oversized) {
+              var parts = [];
+              if (rejected) parts.push("only JPG, JPEG, PNG and PDF files are accepted");
+              if (oversized) parts.push("each file must be 10MB or smaller");
+              var prefix = added ? (added + " file" + (added > 1 ? "s" : "") + " added. ") : "";
+              showError(prefix + "Some files were skipped — " + parts.join("; ") + ".");
             } else if (added) {
-              // subtle, no toast needed for normal adds
+              clearError();
             }
             return;
           }
@@ -1525,12 +1603,14 @@
             break;
           }
         }
+        if (sessionFiles.length === 0) clearError();
         renderPreviews();
       }
 
       function clearAllFiles() {
         sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
         sessionFiles = [];
+        clearError();
         renderPreviews();
       }
 
@@ -1561,9 +1641,9 @@
           bar.className = "preview-item__bar";
           bar.innerHTML =
             '<span class="preview-item__name"></span>' +
-            '<span class="preview-item__type"></span>';
+            '<span class="preview-item__meta"></span>';
           bar.querySelector(".preview-item__name").textContent = f.file.name;
-          bar.querySelector(".preview-item__type").textContent = extOf(f.file.name);
+          bar.querySelector(".preview-item__meta").textContent = humanSize(f.file.size) + " · " + extOf(f.file.name);
           item.appendChild(bar);
 
           var rm = document.createElement("button");
@@ -1595,45 +1675,56 @@
       }
 
       /* ---------- Submit ---------- */
+      var isSubmitting = false;
       function submitAddress() {
-        if (sessionFiles.length === 0) return;
+        if (isSubmitting || sessionFiles.length === 0) return;
+        isSubmitting = true;
+        submitBtn.classList.add("is-loading");
+        submitBtn.disabled = true;
+        clearBtn.disabled = true;
 
-        // Build persisted file metadata (simulated secure storage).
-        var filesMeta = sessionFiles.map(function (f) {
-          return {
-            id: f.id,
-            name: f.file.name,
-            size: f.file.size,
-            type: f.file.type || (f.isPdf ? "application/pdf" : "image/*"),
-            thumb: f.thumb || null,
-            isPdf: !!f.isPdf
-          };
-        });
+        // Simulate secure upload to the verification backend (demo: local processing).
+        window.setTimeout(function () {
+          // Build persisted file metadata (simulated secure storage).
+          var filesMeta = sessionFiles.map(function (f) {
+            return {
+              id: f.id,
+              name: f.file.name,
+              size: f.file.size,
+              type: f.file.type || (f.isPdf ? "application/pdf" : "image/*"),
+              thumb: f.thumb || null,
+              isPdf: !!f.isPdf
+            };
+          });
 
-        var now = new Date().toISOString();
-        var ref = genRef();
+          var now = new Date().toISOString();
+          var ref = genRef();
 
-        store.addressStatus = "pending";
-        store.submittedAt = now;
-        store.submittedRef = ref;
-        store.files = filesMeta;
-        store.approvedAt = null;
-        store.approvedRef = null;
-        saveStore(store);
+          store.addressStatus = "pending";
+          store.submittedAt = now;
+          store.submittedRef = ref;
+          store.files = filesMeta;
+          store.approvedAt = null;
+          store.approvedRef = null;
+          saveStore(store);
 
-        // Keep object URLs alive for the pending summary view this session.
-        renderPendingView();
-        switchView("pending");
+          isSubmitting = false;
+          submitBtn.classList.remove("is-loading");
 
-        showToast(
-          "Submission Successful",
-          "Your address documents have been submitted and are now under review."
-        );
+          // Keep object URLs alive for the pending summary view this session.
+          renderPendingView();
+          switchView("pending");
 
-        // Scroll the address card into view so the user sees the pending state.
-        try {
-          $("addressCard").scrollIntoView({ behavior: "smooth", block: "center" });
-        } catch (e) {}
+          showToast(
+            "Submission Successful",
+            "Your address documents have been submitted and are now under review."
+          );
+
+          // Scroll the address card into view so the user sees the pending state.
+          try {
+            $("addressCard").scrollIntoView({ behavior: "smooth", block: "center" });
+          } catch (e) {}
+        }, 1300);
       }
 
       /* ---------- Simulated reviewer approval (demo) ---------- */
@@ -1659,6 +1750,9 @@
         // free any urls
         sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
         sessionFiles = [];
+        isSubmitting = false;
+        submitBtn.classList.remove("is-loading");
+        clearError();
         renderPreviews();
         switchView("awaiting");
         showToast("Workflow Reset", "Address verification has been reset. You can upload again.");
