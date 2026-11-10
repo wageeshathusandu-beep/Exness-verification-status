@@ -2,801 +2,464 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Independent demonstration document & address verification status dashboard. Not affiliated with or endorsed by Exness." />
-  <title>Verification Status · Demo Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Independent demonstration verification status dashboard. Not affiliated with or endorsed by Exness." />
+  <title>Verification Status · Demo</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
   <style>
-    /* ============================================================
-       Design tokens
-       ============================================================ */
+    /* ── Design tokens ───────────────────────────────────────────── */
     :root {
-      --bg-0: #07090f;
-      --bg-1: #0c1018;
-      --bg-2: #121826;
-      --surface: rgba(255, 255, 255, 0.035);
-      --surface-strong: rgba(255, 255, 255, 0.06);
-      --border: rgba(255, 255, 255, 0.09);
-      --border-strong: rgba(255, 255, 255, 0.16);
+      --bg:       #07090f;
+      --bg-1:     #0c1018;
+      --bg-2:     #111724;
+      --surf:     rgba(255,255,255,.038);
+      --surf-hi:  rgba(255,255,255,.068);
+      --border:   rgba(255,255,255,.09);
+      --border-hi:rgba(255,255,255,.16);
 
-      --text-0: #f5f7fb;
-      --text-1: #aab3c5;
-      --text-2: #6b7689;
+      --txt-0: #f5f7fb;
+      --txt-1: #aab3c5;
+      --txt-2: #6b7689;
 
-      --accent: #10b981;          /* completed green */
-      --accent-soft: rgba(16, 185, 129, 0.14);
-      --pending: #f5b942;         /* pending amber/yellow */
-      --pending-soft: rgba(245, 185, 66, 0.14);
-      --info: #3b82f6;
+      --green:        #10b981;
+      --green-soft:   rgba(16,185,129,.14);
+      --amber:        #f5b942;
+      --amber-soft:   rgba(245,185,66,.14);
+      --blue:         #3b82f6;
 
-      --radius: 18px;
-      --radius-sm: 12px;
-      --shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.7);
-      --ring: 0 0 0 1px var(--border);
-      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --r:    18px;
+      --r-sm: 12px;
+      --sh:   0 18px 50px -20px rgba(0,0,0,.7);
+      --ease: cubic-bezier(.22,1,.36,1);
     }
 
-    /* ============================================================
-       Reset & base
-       ============================================================ */
-    *, *::before, *::after { box-sizing: border-box; }
-
+    /* ── Reset ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text-0);
-      background-color: var(--bg-0);
+      min-height: 100dvh;
+      font-family: "Inter","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+      color: var(--txt-0);
+      background: var(--bg);
       background-image:
-        radial-gradient(900px 500px at 80% -8%, rgba(16, 185, 129, 0.10), transparent 60%),
-        radial-gradient(700px 500px at 8% 110%, rgba(245, 185, 66, 0.08), transparent 55%),
-        radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0.02), transparent 70%);
+        radial-gradient(900px 500px at 76% -6%, rgba(16,185,129,.09) , transparent 60%),
+        radial-gradient(700px 500px at 6%  110%,rgba(245,185,66,.07) , transparent 55%);
       background-attachment: fixed;
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      /* prevent iOS rubber-band horizontal scroll */
+      overflow-x: hidden;
     }
 
-    .container {
+    /* ── Layout ──────────────────────────────────────────────────── */
+    .wrap {
       width: 100%;
-      max-width: 980px;
+      max-width: 940px;
       margin: 0 auto;
-      padding: clamp(16px, 4vw, 28px);
+      padding: clamp(14px,4vw,28px);
+      /* safe-area insets for notched phones */
+      padding-left:  max(clamp(14px,4vw,28px), env(safe-area-inset-left));
+      padding-right: max(clamp(14px,4vw,28px), env(safe-area-inset-right));
     }
 
-    /* ============================================================
-       Header
-       ============================================================ */
-    .site-header {
+    /* ── Card base ───────────────────────────────────────────────── */
+    .card {
+      margin-top: 16px;
+      padding: clamp(18px,4vw,26px);
+      border-radius: var(--r);
+      background: var(--surf);
+      border: 1px solid var(--border);
+      box-shadow: var(--sh);
+    }
+
+    /* ── Header ──────────────────────────────────────────────────── */
+    .hdr {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 18px 0 8px;
+      padding: 16px 0 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .brand-mark {
+    .hdr-brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .hdr-mark {
       flex: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-      background: linear-gradient(145deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.05));
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      display: grid; place-items: center;
+      font-size: 18px;
+      background: linear-gradient(145deg,rgba(16,185,129,.22),rgba(16,185,129,.04));
+      border: 1px solid rgba(16,185,129,.28);
     }
+    .hdr-title { font-size: 15px; font-weight: 600; color: var(--txt-0); white-space: nowrap; }
+    .hdr-sub   { font-size: 11.5px; color: var(--txt-2); }
 
-    .brand-text { min-width: 0; }
-    .brand-title {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      color: var(--text-0);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .brand-sub {
-      font-size: 12px;
-      color: var(--text-2);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .demo-badge {
+    /* Compact demo indicator */
+    .hdr-demo {
       flex: none;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 7px 13px;
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      gap: 6px;
+      padding: 5px 11px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
       text-transform: uppercase;
-      color: var(--text-1);
-      background: var(--surface);
+      color: var(--txt-2);
+      background: var(--surf);
       border: 1px solid var(--border);
       border-radius: 999px;
       white-space: nowrap;
     }
-    .demo-badge::before {
+    .hdr-demo::before {
       content: "";
-      width: 7px;
-      height: 7px;
+      width: 6px; height: 6px;
       border-radius: 50%;
-      background: var(--info);
-      box-shadow: 0 0 8px var(--info);
+      background: var(--blue);
+      box-shadow: 0 0 7px var(--blue);
     }
 
-    /* ============================================================
-       Page title block
-       ============================================================ */
-    .page-head { padding: 26px 0 6px; }
-    .page-title {
-      font-size: clamp(24px, 4.4vw, 34px);
+    /* ── Page heading ─────────────────────────────────────────────── */
+    .pg-head { padding: 22px 0 4px; }
+    .pg-title {
+      font-size: clamp(22px,4.2vw,32px);
       font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 8px;
-      background: linear-gradient(180deg, #ffffff, #c7d0e0);
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      background: linear-gradient(175deg,#fff,#b8c4d8);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .page-subtitle { color: var(--text-1); font-size: clamp(14px, 2.6vw, 16px); margin: 0; }
+    .pg-sub { margin-top: 6px; color: var(--txt-1); font-size: clamp(13px,2.4vw,15px); }
 
-    /* ============================================================
-       Status hero banner
-       ============================================================ */
-    .hero {
-      position: relative;
-      margin-top: 22px;
-      padding: clamp(22px, 5vw, 34px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      transition: background 0.6s var(--ease), border-color 0.6s var(--ease);
-    }
-
-    /* Pending (amber) variant */
-    .hero--pending {
-      background: linear-gradient(160deg, rgba(245, 185, 66, 0.10), rgba(245, 185, 66, 0.02));
-      border: 1px solid rgba(245, 185, 66, 0.22);
-    }
-    .hero--pending::after {
-      content: "";
-      position: absolute;
-      inset: -40% auto auto -10%;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(245, 185, 66, 0.18), transparent 70%);
-      filter: blur(20px);
-      pointer-events: none;
-    }
-
-    /* Completed (green) variant */
-    .hero--completed {
-      background: linear-gradient(160deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.02));
-      border: 1px solid rgba(16, 185, 129, 0.24);
-    }
-    .hero--completed::after {
-      content: "";
-      position: absolute;
-      inset: -40% auto auto -10%;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.18), transparent 70%);
-      filter: blur(20px);
-      pointer-events: none;
-    }
-
-    .hero-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Pending badge (yellow) */
-    .badge-pending {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      color: var(--pending);
-      background: var(--pending-soft);
-      border: 1px solid rgba(245, 185, 66, 0.35);
-    }
-    .badge-pending .dot {
-      position: relative;
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--pending);
-    }
-    .badge-pending .dot::after {
-      content: "";
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 2px solid var(--pending);
-      animation: pulse 1.8s var(--ease) infinite;
-    }
-
-    /* Completed badge (green) */
-    .badge-completed {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .ref-id {
-      margin-left: auto;
-      font-size: 12.5px;
-      color: var(--text-2);
-      font-variant-numeric: tabular-nums;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 7px 12px;
-      border-radius: 8px;
-    }
-    .ref-id b { color: var(--text-1); font-weight: 600; }
-
-    .hero-message {
-      position: relative;
-      z-index: 1;
-      margin: 20px 0 0;
-      font-size: clamp(17px, 3.4vw, 22px);
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      line-height: 1.4;
-      color: var(--text-0);
-    }
-
-    .hero-note {
-      position: relative;
-      z-index: 1;
-      margin: 12px 0 0;
-      color: var(--text-1);
-      font-size: clamp(13.5px, 2.6vw, 15px);
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-    }
-    .hero-note svg { flex: none; margin-top: 2px; }
-    .hero-note.is-pending svg { color: var(--pending); }
-    .hero-note.is-done svg { color: var(--accent); }
-    .hero-note.is-info svg { color: var(--info); }
-
-    @keyframes pulse {
-      0% { transform: scale(0.85); opacity: 0.9; }
-      70% { transform: scale(1.6); opacity: 0; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
-
-    /* ============================================================
-       Progress timeline
-       ============================================================ */
-    .card {
-      margin-top: 18px;
-      padding: clamp(20px, 4vw, 28px);
-      border-radius: var(--radius);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-    }
-
-    .card-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-    }
-    .card-head--center { align-items: center; }
-    .card-title {
-      font-size: clamp(15px, 2.8vw, 17px);
-      font-weight: 600;
-      margin: 0;
-      letter-spacing: -0.01em;
-    }
-    .card-helper { font-size: 12.5px; color: var(--text-2); }
-
-    .timeline { position: relative; }
-
-    /* horizontal on desktop, vertical on mobile */
-    .timeline__steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      position: relative;
-    }
-
-    /* connecting line behind the dots */
-    .timeline__line {
-      position: absolute;
-      top: 24px;
-      left: 14%;
-      right: 14%;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 50%, rgba(255, 255, 255, 0.12) 50%);
-      border-radius: 2px;
-      z-index: 0;
-    }
-    .timeline__line--all-done {
-      background: linear-gradient(90deg, rgba(16, 185, 129, 0.85), rgba(16, 185, 129, 0.4));
-    }
-
-    .step {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 4px 6px;
-    }
-
-    .step__icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      background: var(--bg-2);
-      border: 2px solid var(--border);
-      color: var(--text-2);
-      transition: all 0.4s var(--ease);
-    }
-
-    .step.is-done .step__icon {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.08), 0 0 18px rgba(16, 185, 129, 0.25);
-    }
-    .step.is-active .step__icon {
-      background: var(--pending-soft);
-      border-color: var(--pending);
-      color: var(--pending);
-      box-shadow: 0 0 0 6px rgba(245, 185, 66, 0.10), 0 0 18px rgba(245, 185, 66, 0.28);
-      animation: glow 2.4s var(--ease) infinite;
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 0 6px rgba(245, 185, 66, 0.10), 0 0 18px rgba(245, 185, 66, 0.22); }
-      50% { box-shadow: 0 0 0 9px rgba(245, 185, 66, 0.14), 0 0 26px rgba(245, 185, 66, 0.40); }
-    }
-
-    .step__name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-0);
-      margin-bottom: 4px;
-    }
-    .step__status {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-2);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .step.is-done .step__status { color: var(--accent); }
-    .step.is-active .step__status { color: var(--pending); }
-
-    .step__meta {
-      margin-top: 8px;
-      font-size: 11.5px;
-      color: var(--text-2);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .check-tick { display: none; }
-    .step.is-done .check-tick { display: inline; }
-    .step.is-done .num-tick { display: none; }
-
-    /* ============================================================
-       Info grid
-       ============================================================ */
-    .info-grid {
+    /* ── Status summary row ───────────────────────────────────────── */
+    .summary {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 18px;
+      gap: 12px;
+      margin-top: 16px;
     }
-
-    .info-tile {
-      padding: 18px 20px;
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      border: 1px solid var(--border);
+    .summ-tile {
       display: flex;
-      gap: 14px;
-      align-items: flex-start;
+      align-items: center;
+      gap: 13px;
+      padding: 16px 18px;
+      border-radius: var(--r-sm);
+      background: var(--surf);
+      border: 1px solid var(--border);
     }
-
-    .info-tile__icon {
+    .summ-icon {
       flex: none;
-      width: 40px;
-      height: 40px;
+      width: 38px; height: 38px;
       border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: var(--surface-strong);
+      display: grid; place-items: center;
+      background: var(--surf-hi);
       border: 1px solid var(--border);
-      font-size: 17px;
     }
-    .info-tile__icon.amber { color: var(--pending); border-color: rgba(245, 185, 66, 0.3); }
-    .info-tile__icon.blue { color: var(--info); border-color: rgba(59, 130, 246, 0.3); }
-    .info-tile__icon.green { color: var(--accent); border-color: rgba(16, 185, 129, 0.3); }
+    .summ-icon.green { color: var(--green); border-color: rgba(16,185,129,.3); }
+    .summ-icon.amber { color: var(--amber); border-color: rgba(245,185,66,.3); }
+    .summ-icon.blue  { color: var(--blue);  border-color: rgba(59,130,246,.3); }
 
-    .info-tile__label {
-      font-size: 11.5px;
+    .summ-label {
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-2);
+      letter-spacing: .6px;
+      color: var(--txt-2);
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
-    .info-tile__value {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--text-0);
-      line-height: 1.4;
-    }
-    .info-tile__hint { font-size: 12.5px; color: var(--text-2); margin-top: 3px; font-weight: 400; }
+    .summ-val   { font-size: 14px; font-weight: 600; color: var(--txt-0); line-height: 1.3; }
+    .summ-hint  { font-size: 11.5px; color: var(--txt-2); margin-top: 2px; }
 
-    /* ============================================================
-       Inline status list (table-like)
-       ============================================================ */
-    .status-list { display: flex; flex-direction: column; gap: 12px; }
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 15px 18px;
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .status-row__index {
-      flex: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-size: 13px;
-      font-weight: 700;
-      background: var(--surface-strong);
-      color: var(--text-2);
-      border: 1px solid var(--border);
-    }
-    .status-row__name { font-size: 14.5px; font-weight: 600; color: var(--text-0); }
-    .status-row__pill { margin-left: auto; flex: none; }
+    /* ── Pill badges ──────────────────────────────────────────────── */
     .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 13px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 11px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      font-size: 11.5px; font-weight: 700;
+      letter-spacing: .3px;
       text-transform: uppercase;
     }
-    .pill--done { color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(16, 185, 129, 0.32); }
-    .pill--pending { color: var(--pending); background: var(--pending-soft); border: 1px solid rgba(245, 185, 66, 0.35); }
-    .pill .pill__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .pill__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill--done    { color: var(--green); background: var(--green-soft);  border: 1px solid rgba(16,185,129,.3); }
+    .pill--pending { color: var(--amber); background: var(--amber-soft);  border: 1px solid rgba(245,185,66,.33); }
+    .pill--action  { color: var(--blue);  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3); }
 
-    /* ============================================================
-       Address verification section
-       ============================================================ */
-    .addr-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 13px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-      white-space: nowrap;
+    /* ── Timeline ─────────────────────────────────────────────────── */
+    .tl-head {
+      display: flex; align-items: baseline;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 20px;
     }
-    .addr-pill .pill__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-    .addr-pill--action {
-      color: var(--info);
-      background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(59, 130, 246, 0.32);
-    }
-    .addr-pill--pending {
-      color: var(--pending);
-      background: var(--pending-soft);
-      border: 1px solid rgba(245, 185, 66, 0.35);
-    }
-    .addr-pill--done {
-      color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid rgba(16, 185, 129, 0.32);
-    }
+    .tl-title { font-size: clamp(14px,2.6vw,16px); font-weight: 600; }
+    .tl-helper { font-size: 12px; color: var(--txt-2); }
 
-    .addr-desc {
-      color: var(--text-1);
-      font-size: 14.5px;
-      margin: 0 0 16px;
-      line-height: 1.5;
-    }
-
-    .addr-types {
-      list-style: none;
-      margin: 0 0 18px;
-      padding: 0;
+    .tl-steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+      position: relative;
     }
-    .addr-types li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      background: var(--surface);
+    .tl-line {
+      position: absolute;
+      top: 23px; left: 15%; right: 15%;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, rgba(16,185,129,.8), rgba(16,185,129,.35));
+      z-index: 0;
+    }
+    .tl-step {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 2px 4px;
+    }
+    .tl-step__icon {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      margin-bottom: 12px;
+      transition: all .4s var(--ease);
+    }
+    .tl-step.done .tl-step__icon {
+      background: var(--green-soft);
+      border: 2px solid var(--green);
+      color: var(--green);
+      box-shadow: 0 0 0 5px rgba(16,185,129,.07), 0 0 16px rgba(16,185,129,.22);
+    }
+    .tl-step.active .tl-step__icon {
+      background: var(--amber-soft);
+      border: 2px solid var(--amber);
+      color: var(--amber);
+      animation: glow-amber 2.4s var(--ease) infinite;
+    }
+    .tl-step.idle .tl-step__icon {
+      background: var(--bg-2);
+      border: 2px solid var(--border);
+      color: var(--txt-2);
+    }
+    .tl-step__name   { font-size: 13px; font-weight: 600; color: var(--txt-0); margin-bottom: 3px; }
+    .tl-step__status { font-size: 11.5px; font-weight: 500; color: var(--txt-2); }
+    .tl-step.done   .tl-step__status { color: var(--green); }
+    .tl-step.active .tl-step__status { color: var(--amber); }
+    .tl-step__meta   { margin-top: 6px; font-size: 11px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
+
+    .num-tick  { }
+    .chk-tick  { display: none; }
+    .tl-step.done .chk-tick { display: inline; }
+    .tl-step.done .num-tick { display: none; }
+
+    @keyframes glow-amber {
+      0%,100% { box-shadow: 0 0 0 5px rgba(245,185,66,.09), 0 0 16px rgba(245,185,66,.20); }
+      50%      { box-shadow: 0 0 0 8px rgba(245,185,66,.13), 0 0 24px rgba(245,185,66,.38); }
+    }
+
+    /* ── Address verification card ────────────────────────────────── */
+    .card-head {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .card-title { font-size: clamp(14px,2.6vw,16px); font-weight: 600; }
+
+    /* Address pill (uses .pill base) */
+    .addr-pill { /* inherits .pill styles, set via JS */ }
+
+    /* Upload view */
+    .upload-desc {
+      color: var(--txt-1);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .doc-types {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .doc-types li {
+      display: flex; align-items: center; gap: 9px;
+      padding: 11px 13px;
+      border-radius: var(--r-sm);
+      background: var(--surf);
       border: 1px solid var(--border);
-      font-size: 13.5px;
-      color: var(--text-1);
+      font-size: 13px;
+      color: var(--txt-1);
       font-weight: 500;
     }
-    .addr-types li svg { flex: none; color: var(--accent); }
+    .doc-types li svg { flex: none; color: var(--green); }
 
-    /* Dropzone */
+    /* Dropzone — must be display:block to avoid inline-layout artifacts */
     .dropzone {
       display: block;
       position: relative;
-      border: 2px dashed rgba(255, 255, 255, 0.22);
-      border-radius: var(--radius-sm);
-      padding: 34px 20px;
+      border: 2px dashed rgba(255,255,255,.2);
+      border-radius: var(--r-sm);
+      padding: 32px 20px;
       text-align: center;
       cursor: pointer;
-      background: var(--surface);
-      transition: border-color 0.3s var(--ease), background 0.3s var(--ease), transform 0.2s var(--ease);
+      background: var(--surf);
+      transition: border-color .28s var(--ease), background .28s var(--ease);
+      /* tap highlight on Android */
+      -webkit-tap-highlight-color: transparent;
     }
     .dropzone:hover,
     .dropzone:focus-visible {
-      border-color: var(--accent);
-      background: var(--accent-soft);
+      border-color: var(--green);
+      background: var(--green-soft);
       outline: none;
     }
     .dropzone.is-drag {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      transform: scale(1.01);
+      border-color: var(--green);
+      background: var(--green-soft);
+      transform: scale(1.008);
     }
-    .dropzone__icon {
-      width: 52px;
-      height: 52px;
-      margin: 0 auto 12px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: var(--surface-strong);
+    .dz-icon {
+      width: 48px; height: 48px;
+      margin: 0 auto 10px;
+      border-radius: 13px;
+      display: grid; place-items: center;
+      background: var(--surf-hi);
       border: 1px solid var(--border);
-      color: var(--accent);
+      color: var(--green);
     }
-    .dropzone__text {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--text-0);
-    }
-    .dropzone__text span { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-    .dropzone__hint {
-      margin-top: 6px;
-      font-size: 12.5px;
-      color: var(--text-2);
-    }
+    .dz-text   { font-size: 14px; font-weight: 600; color: var(--txt-0); }
+    .dz-text span { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+    .dz-hint   { margin-top: 5px; font-size: 12px; color: var(--txt-2); }
 
     /* Preview grid */
     .preview-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 12px;
-      margin-top: 18px;
+      grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+      gap: 10px;
+      margin-top: 16px;
     }
     .preview-grid:empty { display: none; }
 
     .preview-item {
       position: relative;
-      border-radius: var(--radius-sm);
+      border-radius: var(--r-sm);
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--bg-2);
-      aspect-ratio: 4 / 3;
-      animation: rise 0.4s var(--ease);
+      aspect-ratio: 4/3;
+      animation: rise .35s var(--ease);
     }
     .preview-item img,
     .preview-item .pdf-ph {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
     }
     .preview-item .pdf-ph {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: var(--text-2);
-      background: linear-gradient(160deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02));
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 7px; color: var(--txt-2);
+      background: linear-gradient(155deg,rgba(59,130,246,.08),rgba(59,130,246,.02));
     }
-    .preview-item .pdf-ph span { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+    .preview-item .pdf-ph span { font-size: 10px; font-weight: 800; letter-spacing: .5px; }
 
     .preview-item__bar {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      padding: 7px 9px;
-      background: linear-gradient(180deg, transparent, rgba(7, 9, 15, 0.92));
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-1);
+      position: absolute; left:0; right:0; bottom:0;
+      padding: 6px 8px;
+      background: linear-gradient(180deg,transparent,rgba(7,9,15,.92));
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10.5px; color: var(--txt-1);
     }
     .preview-item__name {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       font-weight: 600;
-    }
-    .preview-item__type {
-      flex: none;
-      padding: 1px 6px;
-      border-radius: 5px;
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      color: var(--text-2);
-      background: var(--surface-strong);
-      border: 1px solid var(--border);
     }
     .preview-item__meta {
-      flex: none;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      color: var(--text-2);
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
+      flex: none; font-size: 9.5px; color: var(--txt-2);
+      white-space: nowrap; font-variant-numeric: tabular-nums;
     }
-
     .preview-item__remove {
-      position: absolute;
-      top: 7px;
-      right: 7px;
-      width: 26px;
-      height: 26px;
+      position: absolute; top: 6px; right: 6px;
+      width: 28px; height: 28px;
       border-radius: 8px;
-      display: grid;
-      place-items: center;
+      display: grid; place-items: center;
       border: 1px solid var(--border);
-      background: rgba(7, 9, 15, 0.72);
-      color: var(--text-1);
+      background: rgba(7,9,15,.72);
+      color: var(--txt-1);
       cursor: pointer;
-      transition: all 0.2s var(--ease);
-      backdrop-filter: blur(6px);
+      transition: all .2s var(--ease);
+      backdrop-filter: blur(4px);
+      /* minimum tap target */
+      touch-action: manipulation;
     }
-    .preview-item__remove:hover {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: rgba(239, 68, 68, 0.5);
+    .preview-item__remove:hover,
+    .preview-item__remove:focus-visible {
+      background: rgba(239,68,68,.22);
+      border-color: rgba(239,68,68,.48);
       color: #fca5a5;
     }
 
-    .preview-empty-note {
-      margin-top: 14px;
-      font-size: 12.5px;
-      color: var(--text-2);
-      display: flex;
-      align-items: center;
-      gap: 7px;
+    .empty-note {
+      display: flex; align-items: center; gap: 7px;
+      margin-top: 12px;
+      font-size: 12.5px; color: var(--txt-2);
     }
 
-    /* Upload error banner */
+    /* Error banner */
     .addr-error {
-      margin-top: 14px;
       display: none;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      background: rgba(239, 68, 68, 0.10);
-      border: 1px solid rgba(239, 68, 68, 0.32);
+      align-items: flex-start; gap: 9px;
+      margin-top: 12px;
+      padding: 11px 13px;
+      border-radius: var(--r-sm);
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
       color: #fca5a5;
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 13px; line-height: 1.44;
     }
     .addr-error.show { display: flex; }
-    .addr-error svg { flex: none; margin-top: 1px; color: #fca5a5; }
+    .addr-error svg { flex: none; margin-top: 2px; color: #fca5a5; }
 
-    /* Buttons */
+    /* Action buttons */
     .addr-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: 22px;
-      flex-wrap: wrap;
+      display: flex; align-items: center;
+      gap: 12px; margin-top: 20px; flex-wrap: wrap;
     }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
+      display: inline-flex; align-items: center; gap: 9px;
       position: relative;
-      padding: 13px 26px;
-      border-radius: 12px;
-      font-size: 14.5px;
-      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 11px;
+      font-size: 14px; font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      border: 1px solid var(--border-strong);
-      background: var(--surface-strong);
-      color: var(--text-0);
-      transition: all 0.25s var(--ease);
+      border: 1px solid var(--border-hi);
+      background: var(--surf-hi);
+      color: var(--txt-0);
+      transition: all .22s var(--ease);
+      /* large tap target on mobile */
+      min-height: 44px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     .btn--primary {
-      background: linear-gradient(145deg, var(--accent), #0ea672);
-      border-color: rgba(16, 185, 129, 0.5);
-      color: #04130d;
-      box-shadow: 0 10px 24px -10px rgba(16, 185, 129, 0.6);
+      background: linear-gradient(145deg, var(--green), #0ea470);
+      border-color: rgba(16,185,129,.48);
+      color: #031a0e;
+      box-shadow: 0 8px 22px -10px rgba(16,185,129,.55);
     }
     .btn--primary:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 14px 30px -10px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 12px 28px -10px rgba(16,185,129,.68);
     }
     .btn--primary:active:not(:disabled) { transform: translateY(0); }
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .btn:disabled { opacity: .38; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn--ghost { background: transparent; }
-    .btn--ghost:hover { background: var(--surface-strong); }
+    .btn--ghost:hover:not(:disabled) { background: var(--surf-hi); }
 
-    /* Submit loading state */
+    /* Spinner overlay */
     .btn.is-loading { pointer-events: none; }
     .btn.is-loading .btn-icon,
     .btn.is-loading .btn-label,
@@ -804,1094 +467,881 @@
     .spinner {
       display: none;
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 17px;
-      height: 17px;
+      left: 50%; top: 50%;
+      width: 17px; height: 17px;
       margin: -8.5px 0 0 -8.5px;
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      border-top-color: #ffffff;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin .65s linear infinite;
     }
     .btn.is-loading .spinner { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .btn-counter {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.18);
+      font-size: 11.5px; font-weight: 700;
+      padding: 1px 7px; border-radius: 999px;
+      background: rgba(0,0,0,.18);
     }
 
-    /* Address pending / done views */
+    /* ── Pending / done state views ───────────────────────────────── */
     .addr-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 14px 10px 6px;
-      animation: rise 0.5s var(--ease);
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 10px 8px 4px;
+      animation: rise .45s var(--ease);
     }
     .addr-state__icon {
-      width: 64px;
-      height: 64px;
+      width: 62px; height: 62px;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
-      margin-bottom: 18px;
+      display: grid; place-items: center;
+      margin-bottom: 16px;
     }
     .addr-state__icon--pending {
-      color: var(--pending);
-      background: var(--pending-soft);
-      border: 1px solid rgba(245, 185, 66, 0.35);
-      box-shadow: 0 0 0 8px rgba(245, 185, 66, 0.06), 0 0 22px rgba(245, 185, 66, 0.22);
-      animation: glow 2.6s var(--ease) infinite;
+      color: var(--amber);
+      background: var(--amber-soft);
+      border: 1px solid rgba(245,185,66,.33);
+      box-shadow: 0 0 0 7px rgba(245,185,66,.06), 0 0 20px rgba(245,185,66,.20);
+      animation: glow-amber 2.6s var(--ease) infinite;
     }
     .addr-state__icon--done {
-      color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.06), 0 0 22px rgba(16, 185, 129, 0.22);
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(16,185,129,.33);
+      box-shadow: 0 0 0 7px rgba(16,185,129,.06), 0 0 20px rgba(16,185,129,.20);
     }
     .addr-state__title {
-      font-size: 20px;
-      font-weight: 700;
-      margin: 0 0 8px;
-      letter-spacing: -0.01em;
+      font-size: 19px; font-weight: 700;
+      letter-spacing: -.01em; margin-bottom: 7px;
     }
     .addr-state__msg {
-      max-width: 520px;
-      color: var(--text-1);
-      font-size: 14.5px;
-      margin: 0 0 18px;
-      line-height: 1.55;
+      max-width: 500px; color: var(--txt-1);
+      font-size: 14px; line-height: 1.55; margin-bottom: 18px;
     }
 
     .addr-meta {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 18px;
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 8px;
+      margin-bottom: 16px;
     }
     .addr-meta__chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: var(--surface);
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 12px;
+      border-radius: 9px;
+      background: var(--surf);
       border: 1px solid var(--border);
-      font-size: 12.5px;
-      color: var(--text-2);
+      font-size: 12px; color: var(--txt-2);
     }
-    .addr-meta__chip b { color: var(--text-0); font-weight: 600; }
-    .addr-meta__chip svg { color: var(--pending); }
+    .addr-meta__chip b { color: var(--txt-0); font-weight: 600; }
+    .addr-meta__chip svg { color: var(--amber); }
 
     .addr-doc-summary {
-      width: 100%;
-      max-width: 480px;
-      margin: 4px 0 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      width: 100%; max-width: 460px;
+      display: flex; flex-direction: column;
+      gap: 7px; margin-bottom: 16px;
     }
     .addr-doc-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
-      border-radius: 10px;
-      background: var(--surface);
+      display: flex; align-items: center;
+      gap: 11px; padding: 10px 13px;
+      border-radius: 9px;
+      background: var(--surf);
       border: 1px solid var(--border);
       font-size: 13px;
     }
     .addr-doc-row__icon {
-      flex: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      background: var(--surface-strong);
+      flex: none; width: 30px; height: 30px;
+      border-radius: 7px;
+      display: grid; place-items: center;
+      background: var(--surf-hi);
       border: 1px solid var(--border);
-      color: var(--text-1);
+      color: var(--txt-1);
       overflow: hidden;
     }
     .addr-doc-row__icon img { width: 100%; height: 100%; object-fit: cover; }
     .addr-doc-row__name {
-      flex: 1;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--text-0);
-      font-weight: 600;
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--txt-0); font-weight: 600;
     }
-    .addr-doc-row__size { flex: none; color: var(--text-2); font-size: 11.5px; }
+    .addr-doc-row__size { flex: none; color: var(--txt-2); font-size: 11.5px; }
 
-    /* Demo simulate control */
-    .demo-control {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 18px;
-      padding: 12px 14px;
-      border-radius: var(--radius-sm);
-      background: rgba(59, 130, 246, 0.06);
-      border: 1px dashed rgba(59, 130, 246, 0.28);
-      font-size: 12.5px;
-      color: var(--text-1);
-      flex-wrap: wrap;
+    /* Demo control strip */
+    .demo-strip {
+      display: flex; align-items: center;
+      gap: 10px; flex-wrap: wrap;
+      margin-top: 16px; padding: 11px 13px;
+      border-radius: var(--r-sm);
+      background: rgba(59,130,246,.05);
+      border: 1px dashed rgba(59,130,246,.24);
+      font-size: 12px; color: var(--txt-1);
     }
-    .demo-control svg { flex: none; color: var(--info); }
-    .demo-control .demo-control__text { flex: 1; min-width: 160px; }
-    .demo-control .btn { padding: 9px 16px; font-size: 13px; }
+    .demo-strip__icon { flex: none; color: var(--blue); }
+    .demo-strip__text { flex: 1; min-width: 140px; }
+    .demo-strip .btn  { padding: 8px 15px; font-size: 12.5px; }
 
-    .view { animation: rise 0.45s var(--ease); }
-    [hidden] { display: none !important; }
-
-    /* ============================================================
-       Toast notification
-       ============================================================ */
+    /* ── Toast ────────────────────────────────────────────────────── */
     .toast {
       position: fixed;
-      top: 22px;
-      left: 50%;
-      z-index: 1000;
-      display: flex;
-      align-items: flex-start;
-      gap: 13px;
-      max-width: calc(100vw - 32px);
-      width: 420px;
-      padding: 16px 18px;
-      border-radius: var(--radius-sm);
-      background: linear-gradient(160deg, rgba(16, 185, 129, 0.14), rgba(12, 16, 24, 0.96));
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(16, 185, 129, 0.1);
+      top: 18px; left: 50%;
+      z-index: 999;
+      display: flex; align-items: flex-start; gap: 12px;
+      max-width: calc(100vw - 24px); width: 400px;
+      padding: 14px 16px;
+      border-radius: var(--r-sm);
+      background: linear-gradient(155deg,rgba(16,185,129,.13),rgba(10,14,22,.97));
+      border: 1px solid rgba(16,185,129,.38);
+      box-shadow: 0 18px 44px -16px rgba(0,0,0,.8);
       backdrop-filter: blur(14px);
-      transform: translate(-50%, -150%);
+      transform: translate(-50%,-160%);
       opacity: 0;
-      transition: transform 0.5s var(--ease), opacity 0.5s var(--ease);
+      transition: transform .45s var(--ease), opacity .45s var(--ease);
       pointer-events: none;
     }
-    .toast.show {
-      transform: translate(-50%, 0);
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .toast.show { transform: translate(-50%,0); opacity: 1; pointer-events: auto; }
     .toast__icon {
-      flex: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: var(--accent-soft);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--accent);
+      flex: none; width: 34px; height: 34px;
+      border-radius: 9px; display: grid; place-items: center;
+      background: var(--green-soft);
+      border: 1px solid rgba(16,185,129,.33);
+      color: var(--green);
     }
-    .toast__title { font-size: 14.5px; font-weight: 700; color: var(--text-0); margin-bottom: 2px; }
-    .toast__msg { font-size: 13px; color: var(--text-1); line-height: 1.45; }
+    .toast__title { font-size: 14px; font-weight: 700; color: var(--txt-0); margin-bottom: 2px; }
+    .toast__msg   { font-size: 12.5px; color: var(--txt-1); line-height: 1.44; }
     .toast__close {
-      flex: none;
-      background: none;
-      border: none;
-      color: var(--text-2);
-      cursor: pointer;
-      padding: 2px;
-      margin-left: 4px;
+      flex: none; background: none; border: none;
+      color: var(--txt-2); cursor: pointer; padding: 2px;
+      margin-left: 2px;
+      min-width: 28px; min-height: 28px;
+      display: grid; place-items: center;
     }
-    .toast__close:hover { color: var(--text-0); }
+    .toast__close:hover { color: var(--txt-0); }
 
-    /* ============================================================
-       Footer / disclaimer
-       ============================================================ */
-    .disclaimer {
-      margin-top: 26px;
-      padding: 16px 18px;
-      border-radius: var(--radius-sm);
-      background: rgba(59, 130, 246, 0.06);
-      border: 1px solid rgba(59, 130, 246, 0.22);
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      font-size: 12.5px;
-      color: var(--text-1);
-      line-height: 1.5;
+    /* ── Disclosure footer ────────────────────────────────────────── */
+    .footer {
+      margin-top: 28px;
+      padding: 14px 0 max(20px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 11.5px; color: var(--txt-2); line-height: 1.5;
     }
-    .disclaimer svg { flex: none; margin-top: 1px; color: var(--info); }
+    .footer svg { flex: none; margin-top: 1px; color: var(--txt-2); }
+    .footer strong { color: var(--txt-1); }
 
-    .site-footer {
-      margin-top: 22px;
-      padding-bottom: 28px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-2);
-    }
-
-    /* ============================================================
-       Entrance animations
-       ============================================================ */
+    /* ── Entrance animations ──────────────────────────────────────── */
     .reveal {
       opacity: 0;
-      transform: translateY(14px);
-      animation: rise 0.7s var(--ease) forwards;
+      transform: translateY(12px);
+      animation: rise .65s var(--ease) forwards;
     }
-    .reveal:nth-child(2) { animation-delay: 0.08s; }
-    .reveal:nth-child(3) { animation-delay: 0.16s; }
-    .reveal:nth-child(4) { animation-delay: 0.24s; }
-    .reveal:nth-child(5) { animation-delay: 0.32s; }
-    .reveal:nth-child(6) { animation-delay: 0.40s; }
-    .reveal:nth-child(7) { animation-delay: 0.48s; }
-    @keyframes rise {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .reveal:nth-child(2) { animation-delay: .07s; }
+    .reveal:nth-child(3) { animation-delay: .14s; }
+    .reveal:nth-child(4) { animation-delay: .21s; }
+    .reveal:nth-child(5) { animation-delay: .28s; }
+    .reveal:nth-child(6) { animation-delay: .35s; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
 
-    /* ============================================================
-       Responsive
-       ============================================================ */
-    @media (max-width: 680px) {
-      .timeline__steps {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-      .timeline__line { display: none; }
+    .view { animation: rise .4s var(--ease); }
+    [hidden] { display: none !important; }
 
-      .step {
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      /* Timeline collapses to vertical list */
+      .tl-steps { grid-template-columns: 1fr; gap: 0; }
+      .tl-line   { display: none; }
+      .tl-step {
         flex-direction: row;
         align-items: center;
         text-align: left;
-        gap: 14px;
-        padding: 14px 12px;
+        gap: 13px;
+        padding: 13px 10px;
         border-bottom: 1px solid var(--border);
       }
-      .step:last-child { border-bottom: none; }
-      .step__icon { margin-bottom: 0; flex: none; }
-      .step__body { text-align: left; }
-      .step__meta { margin-top: 4px; }
+      .tl-step:last-child { border-bottom: none; }
+      .tl-step__icon  { margin-bottom: 0; flex: none; }
+      .tl-step__meta  { margin-top: 3px; }
 
-      .info-grid { grid-template-columns: 1fr; }
-      .ref-id { margin-left: 0; width: 100%; text-align: center; margin-top: 4px; }
-      .hero-top { gap: 10px; }
+      /* Summary tiles stack */
+      .summary { grid-template-columns: 1fr; gap: 10px; }
 
-      .toast { width: calc(100vw - 24px); top: 12px; }
+      /* Document type chips stack */
+      .doc-types { grid-template-columns: 1fr; gap: 7px; }
 
+      /* Dropzone compact */
+      .dropzone { padding: 24px 16px; }
+
+      /* Preview smaller cards */
+      .preview-grid { grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); gap: 8px; }
       .preview-item__remove { width: 30px; height: 30px; }
-      .addr-actions .btn { padding: 12px 20px; font-size: 14px; }
+
+      /* Action buttons full-width */
+      .addr-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+      .addr-actions .btn { justify-content: center; }
+
+      /* Meta chips compact */
+      .addr-meta__chip { font-size: 11.5px; padding: 6px 10px; }
+
+      /* Toast full-width */
+      .toast { width: calc(100vw - 20px); top: 10px; }
     }
 
-    @media (max-width: 420px) {
-      .preview-grid { grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
-      .dropzone { padding: 26px 16px; }
-      .addr-types { grid-template-columns: 1fr; }
-      .addr-meta__chip { font-size: 12px; padding: 7px 11px; }
-      .addr-actions { flex-direction: column; align-items: stretch; }
-      .addr-actions .btn { justify-content: center; width: 100%; }
+    @media (max-width: 360px) {
+      .wrap { padding: 12px; }
+      .pg-title { font-size: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation: none !important;
-        transition: none !important;
-      }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
       .reveal { opacity: 1; transform: none; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="wrap">
 
-    <!-- Header -->
-    <header class="site-header">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">🛡️</div>
-        <div class="brand-text">
-          <div class="brand-title">Verification Status</div>
-          <div class="brand-sub">Document & Address Review Dashboard</div>
-        </div>
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-mark" aria-hidden="true">🛡️</div>
+      <div>
+        <div class="hdr-title">Verification Status</div>
+        <div class="hdr-sub">Independent demonstration dashboard</div>
       </div>
-      <span class="demo-badge">Demo</span>
-    </header>
+    </div>
+    <span class="hdr-demo">Demo</span>
+  </header>
 
-    <!-- Page title -->
-    <div class="page-head">
-      <h1 class="page-title">Verification Status</h1>
-      <p class="page-subtitle">Track the progress of your document and address verification in real time.</p>
+  <!-- ── Page heading ───────────────────────────────────────────── -->
+  <div class="pg-head reveal">
+    <h1 class="pg-title">Document &amp; Address Verification</h1>
+    <p class="pg-sub">Sample verification workflow — all statuses are illustrative only.</p>
+  </div>
+
+  <!-- ── Status summary ─────────────────────────────────────────── -->
+  <div class="summary reveal">
+
+    <div class="summ-tile">
+      <div class="summ-icon green" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div class="summ-label">Document Verification</div>
+        <div class="summ-val">Completed</div>
+        <div class="summ-hint">Identity documents verified — sample data</div>
+      </div>
     </div>
 
-    <!-- Hero status banner — Document Verification COMPLETED -->
-    <section class="hero hero--completed reveal" aria-live="polite">
-      <div class="hero-top">
-        <span class="badge-completed">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Completed
-        </span>
-        <span class="ref-id">Reference <b>#VD-2026-1106-AX9</b></span>
+    <div class="summ-tile">
+      <div class="summ-icon blue" id="summAddrIcon" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div>
+        <div class="summ-label">Address Verification</div>
+        <div class="summ-val" id="infoAddrValue">Awaiting upload</div>
+        <div class="summ-hint" id="infoAddrHint">Upload your proof of address to continue.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Progress timeline ──────────────────────────────────────── -->
+  <section class="card reveal" aria-label="Document verification progress">
+    <div class="tl-head">
+      <h2 class="tl-title">Document Verification Timeline</h2>
+      <span class="tl-helper">3 of 3 steps complete</span>
+    </div>
+    <div class="tl-steps" role="list">
+      <div class="tl-line" aria-hidden="true"></div>
+
+      <div class="tl-step done" role="listitem">
+        <div class="tl-step__icon" aria-hidden="true">
+          <svg class="chk-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="num-tick">1</span>
+        </div>
+        <div>
+          <div class="tl-step__name">Upload Documents</div>
+          <div class="tl-step__status">Completed</div>
+          <div class="tl-step__meta">Nov 6, 09:42</div>
+        </div>
       </div>
 
-      <p class="hero-message">
-        Your identity documents have been verified successfully.
+      <div class="tl-step done" role="listitem">
+        <div class="tl-step__icon" aria-hidden="true">
+          <svg class="chk-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="num-tick">2</span>
+        </div>
+        <div>
+          <div class="tl-step__name">Document Processing</div>
+          <div class="tl-step__status">Completed</div>
+          <div class="tl-step__meta">Nov 6, 11:15</div>
+        </div>
+      </div>
+
+      <div class="tl-step done" role="listitem">
+        <div class="tl-step__icon" aria-hidden="true">
+          <svg class="chk-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="num-tick">3</span>
+        </div>
+        <div>
+          <div class="tl-step__name">Verification Status</div>
+          <div class="tl-step__status">Completed</div>
+          <div class="tl-step__meta">Nov 6, 14:03</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Address Verification ───────────────────────────────────── -->
+  <section class="card reveal" id="addressCard" aria-label="Address verification">
+    <div class="card-head">
+      <h2 class="card-title">Address Verification</h2>
+      <span id="addrPill" class="pill addr-pill"></span>
+    </div>
+
+    <!-- Upload view -->
+    <div id="addrUploadView" class="view">
+      <p class="upload-desc">
+        Upload a recent proof of address (issued within the last 3 months).
+        We accept clear, legible copies of the document types below.
       </p>
 
-      <div class="hero-note is-done">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        <span>All document checks passed. Your identity is verified.</span>
+      <ul class="doc-types">
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Utility bills
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Bank statements
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>
+          Official address documents
+        </li>
+      </ul>
+
+      <!-- Dropzone — label wraps hidden input so the entire zone is a click target -->
+      <label class="dropzone" id="dropzone" for="fileInput" tabindex="0" role="button" aria-label="Upload files — click to browse or drag and drop">
+        <input type="file" id="fileInput" multiple
+               accept="image/jpeg,image/jpg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+               hidden />
+        <div class="dz-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="dz-text">Drag &amp; drop here, or <span>browse files</span></div>
+        <div class="dz-hint">JPG · PNG · PDF &nbsp;·&nbsp; max 10 MB per file</div>
+      </label>
+
+      <div class="preview-grid" id="previewGrid" aria-live="polite" aria-label="Uploaded file previews"></div>
+
+      <div class="empty-note" id="previewEmptyNote">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+        No files added yet — add at least one document to submit.
       </div>
 
-      <div class="hero-note is-info">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
-        <span>Complete <strong style="color:var(--text-0)">Address Verification</strong> below to finalize your account.</span>
-      </div>
-    </section>
-
-    <!-- Progress timeline -->
-    <section class="card reveal" aria-label="Document verification progress timeline">
-      <div class="card-head">
-        <h2 class="card-title">Progress Timeline</h2>
-        <span class="card-helper">3 of 3 steps complete</span>
+      <div class="addr-error" id="addrError" role="alert" aria-live="assertive">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+        <span id="addrErrorMsg">Only JPG, PNG and PDF files up to 10 MB are accepted.</span>
       </div>
 
-      <div class="timeline">
-        <div class="timeline__line timeline__line--all-done" aria-hidden="true"></div>
-        <div class="timeline__steps">
+      <div class="addr-actions">
+        <button class="btn btn--primary" id="submitBtn" disabled>
+          <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span class="btn-label">Submit for Verification</span>
+          <span class="btn-counter" id="btnCounter" hidden>0</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+        <button class="btn btn--ghost" id="clearBtn" disabled>Clear all</button>
+      </div>
+    </div><!-- /addrUploadView -->
 
-          <!-- Step 1 -->
-          <div class="step is-done">
-            <div class="step__icon" aria-hidden="true">
-              <svg class="check-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span class="num-tick">1</span>
-            </div>
-            <div class="step__body">
-              <div class="step__name">Upload Documents</div>
-              <div class="step__status">Completed</div>
-              <div class="step__meta">Nov 6, 09:42</div>
-            </div>
-          </div>
+    <!-- Pending view -->
+    <div id="addrPendingView" class="view" hidden>
+      <div class="addr-state">
+        <div class="addr-state__icon addr-state__icon--pending" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <h3 class="addr-state__title">Address Verification Submitted</h3>
+        <p class="addr-state__msg">Your documents are currently under review.</p>
 
-          <!-- Step 2 -->
-          <div class="step is-done">
-            <div class="step__icon" aria-hidden="true">
-              <svg class="check-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span class="num-tick">2</span>
-            </div>
-            <div class="step__body">
-              <div class="step__name">Document Processing</div>
-              <div class="step__status">Completed</div>
-              <div class="step__meta">Nov 6, 11:15</div>
-            </div>
-          </div>
+        <div class="addr-meta">
+          <span class="addr-meta__chip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            Submitted <b id="submittedAt">—</b>
+          </span>
+          <span class="addr-meta__chip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <b id="submittedCount">0</b>&nbsp;document(s)
+          </span>
+          <span class="addr-meta__chip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"/></svg>
+            Ref <b id="submittedRef">—</b>
+          </span>
+        </div>
 
-          <!-- Step 3 -->
-          <div class="step is-done">
-            <div class="step__icon" aria-hidden="true">
-              <svg class="check-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span class="num-tick">3</span>
-            </div>
-            <div class="step__body">
-              <div class="step__name">Verification Status</div>
-              <div class="step__status">Completed</div>
-              <div class="step__meta">Nov 6, 14:03</div>
-            </div>
-          </div>
+        <div class="addr-doc-summary" id="submittedDocs"></div>
 
+        <div class="demo-strip" id="demoPendingControl">
+          <svg class="demo-strip__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+          <span class="demo-strip__text">Demo only — approval is simulated. In a real system the status would remain pending until a reviewer acts.</span>
+          <button class="btn btn--primary" id="simulateApproveBtn">Simulate Approval</button>
         </div>
       </div>
+    </div><!-- /addrPendingView -->
 
-      <!-- Inline status list -->
-      <div class="status-list" style="margin-top:24px">
-        <div class="status-row">
-          <span class="status-row__index">1</span>
-          <span class="status-row__name">Upload Documents</span>
-          <span class="status-row__pill"><span class="pill pill--done"><span class="pill__dot"></span>Completed</span></span>
+    <!-- Completed view -->
+    <div id="addrDoneView" class="view" hidden>
+      <div class="addr-state">
+        <div class="addr-state__icon addr-state__icon--done" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="status-row">
-          <span class="status-row__index">2</span>
-          <span class="status-row__name">Document Processing</span>
-          <span class="status-row__pill"><span class="pill pill--done"><span class="pill__dot"></span>Completed</span></span>
-        </div>
-        <div class="status-row">
-          <span class="status-row__index">3</span>
-          <span class="status-row__name">Verification Status</span>
-          <span class="status-row__pill"><span class="pill pill--done"><span class="pill__dot"></span>Completed</span></span>
-        </div>
-      </div>
-    </section>
+        <h3 class="addr-state__title">Address Verified</h3>
+        <p class="addr-state__msg">
+          Your proof of address has been reviewed and approved.
+          <em style="display:block;margin-top:4px;font-size:12.5px;color:var(--txt-2);font-style:normal;">(This approval was simulated — sample data only.)</em>
+        </p>
 
-    <!-- Address Verification -->
-    <section class="card reveal" id="addressCard" aria-label="Address verification">
-      <div class="card-head card-head--center">
-        <h2 class="card-title">Address Verification</h2>
-        <span class="addr-pill" id="addrPill"></span>
-      </div>
-
-      <!-- Upload view -->
-      <div id="addrUploadView" class="view">
-        <p class="addr-desc">Upload proof of your residential address to complete verification. We accept clear, legible copies of recent documents (issued within the last 3 months).</p>
-
-        <ul class="addr-types">
-          <li>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-            Utility bills
-          </li>
-          <li>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>
-            Bank statements
-          </li>
-          <li>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path><path d="m9 12 2 2 4-4"></path></svg>
-            Official address documents
-          </li>
-        </ul>
-
-        <label class="dropzone" id="dropzone" for="fileInput" tabindex="0">
-          <input type="file" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,application/pdf" hidden />
-          <div class="dropzone__icon" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          </div>
-          <div class="dropzone__text">Drag &amp; drop files here, or <span>browse</span></div>
-          <div class="dropzone__hint">Accepted formats: JPG, PNG &amp; PDF · up to 10MB per file</div>
-        </label>
-
-        <div class="preview-grid" id="previewGrid" aria-live="polite"></div>
-        <div class="preview-empty-note" id="previewEmptyNote">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
-          No documents added yet. Add at least one file to submit.
+        <div class="addr-meta">
+          <span class="addr-meta__chip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Approved <b id="approvedAt">—</b>
+          </span>
+          <span class="addr-meta__chip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"/></svg>
+            Ref <b id="approvedRef">—</b>
+          </span>
         </div>
 
-        <div class="addr-error" id="addrError" role="alert">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
-          <span id="addrErrorMsg">Only JPG, JPEG, PNG and PDF files up to 10MB are accepted.</span>
-        </div>
+        <div class="addr-doc-summary" id="approvedDocs"></div>
 
-        <div class="addr-actions">
-          <button class="btn btn--primary" id="submitBtn" disabled>
-            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            <span class="btn-label">Submit for Verification</span>
-            <span class="btn-counter" id="btnCounter" hidden>0</span>
-            <span class="spinner" aria-hidden="true"></span>
-          </button>
-          <button class="btn btn--ghost" id="clearBtn" disabled>Clear all</button>
+        <div class="demo-strip">
+          <svg class="demo-strip__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+          <span class="demo-strip__text">Simulated approval — no documents were sent anywhere. Reset to try the workflow again.</span>
+          <button class="btn btn--ghost" id="resetBtn">Reset Workflow</button>
         </div>
       </div>
+    </div><!-- /addrDoneView -->
 
-      <!-- Pending view -->
-      <div id="addrPendingView" class="view" hidden>
-        <div class="addr-state">
-          <div class="addr-state__icon addr-state__icon--pending" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-          </div>
-          <h3 class="addr-state__title">Address Verification Submitted</h3>
-          <p class="addr-state__msg">Your documents are currently under review.</p>
+  </section><!-- /addressCard -->
 
-          <div class="addr-meta">
-            <span class="addr-meta__chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-              Submitted <b id="submittedAt">—</b>
-            </span>
-            <span class="addr-meta__chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
-              <b id="submittedCount">0</b>&nbsp;documents
-            </span>
-            <span class="addr-meta__chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
-              Reference <b id="submittedRef">—</b>
-            </span>
-          </div>
+  <!-- ── Compact disclosure footer ──────────────────────────────── -->
+  <footer class="footer reveal" role="contentinfo">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+    <span>
+      <strong>Independent demonstration only.</strong>
+      This interface is not affiliated with, endorsed by, or connected to Exness or any official service.
+      All reference IDs, statuses, and verification results shown here are sample data.
+      No documents leave your browser — all processing is local and simulated.
+    </span>
+  </footer>
 
-          <div class="addr-doc-summary" id="submittedDocs"></div>
+</div><!-- /wrap -->
 
-          <div class="demo-control" id="demoPendingControl">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
-            <span class="demo-control__text">Demo mode: address verification stays pending until an authorized reviewer approves it. Simulate that approval below.</span>
-            <button class="btn btn--primary" id="simulateApproveBtn">Simulate Approval</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Completed view -->
-      <div id="addrDoneView" class="view" hidden>
-        <div class="addr-state">
-          <div class="addr-state__icon addr-state__icon--done" aria-hidden="true">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </div>
-          <h3 class="addr-state__title">Address Verified</h3>
-          <p class="addr-state__msg">Your proof of address has been reviewed and approved. Your account verification is now complete.</p>
-          <div class="addr-meta">
-            <span class="addr-meta__chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Approved <b id="approvedAt">—</b>
-            </span>
-            <span class="addr-meta__chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
-              Reference <b id="approvedRef">—</b>
-            </span>
-          </div>
-          <div class="addr-doc-summary" id="approvedDocs"></div>
-          <div class="demo-control">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
-            <span class="demo-control__text">Demo mode: this approval was simulated. You can reset the workflow to try it again.</span>
-            <button class="btn btn--ghost" id="resetBtn">Reset Workflow</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Info cards -->
-    <section class="info-grid reveal">
-      <div class="info-tile" id="infoDocTile">
-        <div class="info-tile__icon green" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        </div>
-        <div>
-          <div class="info-tile__label">Document Verification</div>
-          <div class="info-tile__value">Completed</div>
-          <div class="info-tile__hint">Your identity documents have been verified.</div>
-        </div>
-      </div>
-
-      <div class="info-tile" id="infoAddrTile">
-        <div class="info-tile__icon blue" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-        </div>
-        <div>
-          <div class="info-tile__label">Address Verification</div>
-          <div class="info-tile__value" id="infoAddrValue">Awaiting upload</div>
-          <div class="info-tile__hint" id="infoAddrHint">Upload your proof of address to continue.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Disclaimer -->
-    <aside class="disclaimer reveal">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path>
-      </svg>
-      <span>
-        <strong>Disclaimer:</strong> This is an independent demonstration dashboard created for illustrative purposes only.
-        It is <strong>not</strong> an official Exness service and is not affiliated with, endorsed by, or connected to Exness.
-        All names, statuses, and reference IDs shown here are sample data. In demo mode, verification approval is simulated and no documents leave your browser.
-      </span>
-    </aside>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-      Independent demonstration dashboard · Not an official Exness service
-    </footer>
-
+<!-- Toast notification -->
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+  <div class="toast__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   </div>
-
-  <!-- Toast notification -->
-  <div class="toast" id="toast" role="status" aria-live="polite">
-    <div class="toast__icon" aria-hidden="true">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-    </div>
-    <div class="toast__body">
-      <div class="toast__title" id="toastTitle">Submission Successful</div>
-      <div class="toast__msg" id="toastMsg">Your address documents have been submitted for review.</div>
-    </div>
-    <button class="toast__close" id="toastClose" aria-label="Dismiss notification">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-    </button>
+  <div>
+    <div class="toast__title" id="toastTitle">Done</div>
+    <div class="toast__msg"   id="toastMsg"></div>
   </div>
+  <button class="toast__close" id="toastClose" aria-label="Dismiss">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
 
-  <script>
-    /* ============================================================
-       Verification workflow — client state machine
-       States for address verification: 'awaiting' | 'pending' | 'completed'
-       Demo mode: approval is simulated; documents are persisted locally.
-       ============================================================ */
-    (function () {
-      "use strict";
+<script>
+/* ================================================================
+   Address verification state machine
+   States: 'awaiting' | 'pending' | 'completed'
+   All document processing is local — nothing leaves the browser.
+   Demo mode: reviewer approval is simulated.
+================================================================ */
+(function () {
+  "use strict";
 
-      var STORE_KEY = "exness_demo_addr_verification_v1";
-      var MAX_BYTES = 10 * 1024 * 1024; // 10MB per file
-      var ACCEPT = ["image/jpeg", "image/png", "application/pdf"];
+  var STORE_KEY = "demo_addr_v2";
+  var MAX_BYTES = 10 * 1024 * 1024;
+  var ACCEPT    = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
 
-      /* ---------- Persistence (simulated secure backend storage) ---------- */
-      function loadStore() {
+  /* ── Persistence ───────────────────────────────────────────────── */
+  function loadStore() {
+    try { var r = localStorage.getItem(STORE_KEY); return r ? JSON.parse(r) : {}; }
+    catch(e) { return {}; }
+  }
+  function saveStore(d) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch(e) {}
+  }
+
+  var store = loadStore();
+  if (!store.addressStatus) store.addressStatus = "awaiting";
+  if (!Array.isArray(store.files)) store.files = [];
+  if (!store.submittedAt)  store.submittedAt  = null;
+  if (!store.submittedRef) store.submittedRef = null;
+  if (!store.approvedAt)   store.approvedAt   = null;
+  if (!store.approvedRef)  store.approvedRef  = null;
+
+  var sessionFiles = []; // {id, file, url, thumb, isPdf}
+
+  /* ── DOM refs ──────────────────────────────────────────────────── */
+  var $ = function(id){ return document.getElementById(id); };
+
+  var addrPill        = $("addrPill");
+  var uploadView      = $("addrUploadView");
+  var pendingView     = $("addrPendingView");
+  var doneView        = $("addrDoneView");
+  var dropzone        = $("dropzone");
+  var fileInput       = $("fileInput");
+  var previewGrid     = $("previewGrid");
+  var previewEmptyNote= $("previewEmptyNote");
+  var submitBtn       = $("submitBtn");
+  var clearBtn        = $("clearBtn");
+  var btnCounter      = $("btnCounter");
+  var toast           = $("toast");
+  var toastTitle      = $("toastTitle");
+  var toastMsg        = $("toastMsg");
+  var toastClose      = $("toastClose");
+  var infoAddrValue   = $("infoAddrValue");
+  var infoAddrHint    = $("infoAddrHint");
+  var summAddrIcon    = $("summAddrIcon");
+  var simulateApproveBtn = $("simulateApproveBtn");
+  var resetBtn        = $("resetBtn");
+  var addrError       = $("addrError");
+  var addrErrorMsg    = $("addrErrorMsg");
+
+  /* ── Helpers ───────────────────────────────────────────────────── */
+  function genId() {
+    return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+  function genRef() {
+    var d = new Date(), pad = function(n){ return String(n).padStart(2,"0"); };
+    var stamp = d.getFullYear().toString().slice(2) + pad(d.getMonth()+1) + pad(d.getDate());
+    return "#AV-" + stamp + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+  }
+  function fmtDT(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso); if (isNaN(d.getTime())) return "—";
+    var pad = function(n){ return String(n).padStart(2,"0"); };
+    var mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return mo[d.getMonth()] + " " + d.getDate() + ", " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function humanSize(b) {
+    if (b < 1024) return b + " B";
+    if (b < 1048576) return (b/1024).toFixed(1) + " KB";
+    return (b/1048576).toFixed(2) + " MB";
+  }
+  function extOf(n) { var i = n.lastIndexOf("."); return i >= 0 ? n.slice(i+1).toUpperCase() : "FILE"; }
+
+  /* ── Toast ─────────────────────────────────────────────────────── */
+  var toastTimer = null;
+  function showToast(title, msg) {
+    toastTitle.textContent = title;
+    toastMsg.textContent   = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 5200);
+  }
+  function hideToast() { toast.classList.remove("show"); clearTimeout(toastTimer); }
+  toastClose.addEventListener("click", hideToast);
+
+  /* ── Inline error ──────────────────────────────────────────────── */
+  function showError(msg) {
+    if (addrErrorMsg) addrErrorMsg.textContent = msg;
+    if (addrError)    addrError.classList.add("show");
+  }
+  function clearError() { if (addrError) addrError.classList.remove("show"); }
+
+  /* ── Thumbnail ─────────────────────────────────────────────────── */
+  function makeThumb(file) {
+    return new Promise(function(resolve) {
+      if (!file.type.startsWith("image/")) { resolve(null); return; }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function() {
         try {
-          var raw = localStorage.getItem(STORE_KEY);
-          return raw ? JSON.parse(raw) : {};
-        } catch (e) {
-          return {};
+          var c = document.createElement("canvas"), max = 240;
+          var w = img.width, h = img.height;
+          if (w > h) { h = h*max/w; w = max; } else { w = w*max/h; h = max; }
+          c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL("image/jpeg", 0.7));
+        } catch(e) { resolve(null); }
+        finally { URL.revokeObjectURL(url); }
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
+      img.src = url;
+    });
+  }
+
+  /* ── Validation ────────────────────────────────────────────────── */
+  function isAccepted(file) {
+    return ACCEPT.indexOf(file.type) !== -1 || /\.(jpe?g|png|pdf)$/i.test(file.name);
+  }
+
+  /* ── File handling ─────────────────────────────────────────────── */
+  function addFiles(fileList) {
+    var added = 0, rejected = 0, oversized = 0;
+    var pending = Array.prototype.slice.call(fileList);
+    var loop = function() {
+      if (!pending.length) {
+        renderPreviews();
+        if (rejected || oversized) {
+          var parts = [];
+          if (rejected)  parts.push("only JPG, JPEG, PNG and PDF files are accepted");
+          if (oversized) parts.push("each file must be 10 MB or smaller");
+          var prefix = added ? (added + " file" + (added > 1 ? "s" : "") + " added. ") : "";
+          showError(prefix + "Some files were skipped — " + parts.join("; ") + ".");
+        } else if (added) {
+          clearError();
         }
+        return;
       }
-      function saveStore(data) {
-        try {
-          localStorage.setItem(STORE_KEY, JSON.stringify(data));
-        } catch (e) {
-          /* storage may be full; keep working in-memory */
-        }
-      }
-
-      var store = loadStore();
-      // addressStatus: 'awaiting' | 'pending' | 'completed'
-      if (!store.addressStatus) store.addressStatus = "awaiting";
-      // files: [{id, name, size, type, thumb}]
-      if (!Array.isArray(store.files)) store.files = [];
-      if (!store.submittedAt) store.submittedAt = null;
-      if (!store.submittedRef) store.submittedRef = null;
-      if (!store.approvedAt) store.approvedAt = null;
-      if (!store.approvedRef) store.approvedRef = null;
-
-      // In-memory object URLs for the current session's previews (not persisted wholesale)
-      var sessionFiles = []; // {id, file, url, thumb, isPdf}
-
-      /* ---------- DOM refs ---------- */
-      var $ = function (id) { return document.getElementById(id); };
-
-      var addrPill = $("addrPill");
-      var uploadView = $("addrUploadView");
-      var pendingView = $("addrPendingView");
-      var doneView = $("addrDoneView");
-      var dropzone = $("dropzone");
-      var fileInput = $("fileInput");
-      var previewGrid = $("previewGrid");
-      var previewEmptyNote = $("previewEmptyNote");
-      var submitBtn = $("submitBtn");
-      var clearBtn = $("clearBtn");
-      var btnCounter = $("btnCounter");
-      var toast = $("toast");
-      var toastTitle = $("toastTitle");
-      var toastMsg = $("toastMsg");
-      var toastClose = $("toastClose");
-      var infoAddrValue = $("infoAddrValue");
-      var infoAddrHint = $("infoAddrHint");
-      var infoAddrTileIcon = $("infoAddrTile").querySelector(".info-tile__icon");
-      var simulateApproveBtn = $("simulateApproveBtn");
-      var resetBtn = $("resetBtn");
-      var addrError = $("addrError");
-      var addrErrorMsg = $("addrErrorMsg");
-
-      /* ---------- Helpers ---------- */
-      function genId() {
-        return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-      }
-      function genRef() {
-        var d = new Date();
-        var pad = function (n) { return String(n).padStart(2, "0"); };
-        var stamp = d.getFullYear().toString().slice(2) + pad(d.getMonth() + 1) + pad(d.getDate());
-        var rand = Math.random().toString(36).slice(2, 5).toUpperCase();
-        return "#AV-" + stamp + "-" + rand;
-      }
-      function formatDateTime(iso) {
-        if (!iso) return "—";
-        var d = new Date(iso);
-        if (isNaN(d.getTime())) return "—";
-        var pad = function (n) { return String(n).padStart(2, "0"); };
-        var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        return months[d.getMonth()] + " " + d.getDate() + ", " + pad(d.getHours()) + ":" + pad(d.getMinutes());
-      }
-      function humanSize(bytes) {
-        if (bytes < 1024) return bytes + " B";
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-      }
-      function extOf(name) {
-        var i = name.lastIndexOf(".");
-        return i >= 0 ? name.slice(i + 1).toUpperCase() : "FILE";
-      }
-
-      /* ---------- Toast ---------- */
-      var toastTimer = null;
-      function showToast(title, msg) {
-        toastTitle.textContent = title;
-        toastMsg.textContent = msg;
-        toast.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(hideToast, 5200);
-      }
-      function hideToast() {
-        toast.classList.remove("show");
-        clearTimeout(toastTimer);
-      }
-      toastClose.addEventListener("click", hideToast);
-
-      /* ---------- Inline upload error banner ---------- */
-      function showError(msg) {
-        if (addrErrorMsg) addrErrorMsg.textContent = msg;
-        if (addrError) addrError.classList.add("show");
-      }
-      function clearError() {
-        if (addrError) addrError.classList.remove("show");
-      }
-
-      /* ---------- Thumbnail generation (small data URL, persisted) ---------- */
-      function makeThumb(file) {
-        return new Promise(function (resolve) {
-          if (!file.type.startsWith("image/")) {
-            resolve(null);
-            return;
-          }
-          var url = URL.createObjectURL(file);
-          var img = new Image();
-          img.onload = function () {
-            try {
-              var canvas = document.createElement("canvas");
-              var max = 240;
-              var w = img.width, h = img.height;
-              if (w > h) { h = h * max / w; w = max; } else { w = w * max / h; h = max; }
-              canvas.width = Math.max(1, Math.round(w));
-              canvas.height = Math.max(1, Math.round(h));
-              canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-              resolve(canvas.toDataURL("image/jpeg", 0.7));
-            } catch (e) {
-              resolve(null);
-            } finally {
-              URL.revokeObjectURL(url);
-            }
-          };
-          img.onerror = function () {
-            URL.revokeObjectURL(url);
-            resolve(null);
-          };
-          img.src = url;
-        });
-      }
-
-      /* ---------- Validation ---------- */
-      function isAccepted(file) {
-        return ACCEPT.indexOf(file.type) !== -1 ||
-          /\.(jpe?g|png|pdf)$/i.test(file.name);
-      }
-
-      /* ---------- File handling ---------- */
-      function addFiles(fileList) {
-        var added = 0;
-        var rejected = 0;
-        var oversized = 0;
-        var pending = Array.prototype.slice.call(fileList);
-
-        var loop = function () {
-          if (pending.length === 0) {
-            renderPreviews();
-            if (rejected || oversized) {
-              var parts = [];
-              if (rejected) parts.push("only JPG, JPEG, PNG and PDF files are accepted");
-              if (oversized) parts.push("each file must be 10MB or smaller");
-              var prefix = added ? (added + " file" + (added > 1 ? "s" : "") + " added. ") : "";
-              showError(prefix + "Some files were skipped — " + parts.join("; ") + ".");
-            } else if (added) {
-              clearError();
-            }
-            return;
-          }
-          var file = pending.shift();
-          if (!isAccepted(file)) { rejected++; loop(); return; }
-          if (file.size > MAX_BYTES) { oversized++; loop(); return; }
-
-          makeThumb(file).then(function (thumb) {
-            var id = genId();
-            var isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-            var url = isPdf ? null : URL.createObjectURL(file);
-            sessionFiles.push({ id: id, file: file, url: url, thumb: thumb, isPdf: isPdf });
-            added++;
-            loop();
-          });
-        };
+      var file = pending.shift();
+      if (!isAccepted(file)) { rejected++; loop(); return; }
+      if (file.size > MAX_BYTES) { oversized++; loop(); return; }
+      makeThumb(file).then(function(thumb) {
+        var id = genId();
+        var isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+        var url   = isPdf ? null : URL.createObjectURL(file);
+        sessionFiles.push({ id: id, file: file, url: url, thumb: thumb, isPdf: isPdf });
+        added++;
         loop();
-      }
-
-      function removeFile(id) {
-        for (var i = 0; i < sessionFiles.length; i++) {
-          if (sessionFiles[i].id === id) {
-            if (sessionFiles[i].url) URL.revokeObjectURL(sessionFiles[i].url);
-            sessionFiles.splice(i, 1);
-            break;
-          }
-        }
-        if (sessionFiles.length === 0) clearError();
-        renderPreviews();
-      }
-
-      function clearAllFiles() {
-        sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
-        sessionFiles = [];
-        clearError();
-        renderPreviews();
-      }
-
-      /* ---------- Render previews ---------- */
-      function renderPreviews() {
-        previewGrid.innerHTML = "";
-        var count = sessionFiles.length;
-
-        sessionFiles.forEach(function (f) {
-          var item = document.createElement("div");
-          item.className = "preview-item";
-
-          if (f.isPdf || !f.url) {
-            var ph = document.createElement("div");
-            ph.className = "pdf-ph";
-            ph.innerHTML =
-              '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6M9 17h6"></path></svg>' +
-              "<span>PDF</span>";
-            item.appendChild(ph);
-          } else {
-            var img = document.createElement("img");
-            img.src = f.url;
-            img.alt = f.file.name;
-            item.appendChild(img);
-          }
-
-          var bar = document.createElement("div");
-          bar.className = "preview-item__bar";
-          bar.innerHTML =
-            '<span class="preview-item__name"></span>' +
-            '<span class="preview-item__meta"></span>';
-          bar.querySelector(".preview-item__name").textContent = f.file.name;
-          bar.querySelector(".preview-item__meta").textContent = humanSize(f.file.size) + " · " + extOf(f.file.name);
-          item.appendChild(bar);
-
-          var rm = document.createElement("button");
-          rm.className = "preview-item__remove";
-          rm.type = "button";
-          rm.setAttribute("aria-label", "Remove " + f.file.name);
-          rm.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-          (function (id) {
-            rm.addEventListener("click", function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              removeFile(id);
-            });
-          })(f.id);
-          item.appendChild(rm);
-
-          previewGrid.appendChild(item);
-        });
-
-        previewEmptyNote.style.display = count ? "none" : "flex";
-        submitBtn.disabled = count === 0;
-        clearBtn.disabled = count === 0;
-        if (count > 0) {
-          btnCounter.hidden = false;
-          btnCounter.textContent = count;
-        } else {
-          btnCounter.hidden = true;
-        }
-      }
-
-      /* ---------- Submit ---------- */
-      var isSubmitting = false;
-      function submitAddress() {
-        if (isSubmitting || sessionFiles.length === 0) return;
-        isSubmitting = true;
-        submitBtn.classList.add("is-loading");
-        submitBtn.disabled = true;
-        clearBtn.disabled = true;
-
-        // Simulate secure upload to the verification backend (demo: local processing).
-        window.setTimeout(function () {
-          // Build persisted file metadata (simulated secure storage).
-          var filesMeta = sessionFiles.map(function (f) {
-            return {
-              id: f.id,
-              name: f.file.name,
-              size: f.file.size,
-              type: f.file.type || (f.isPdf ? "application/pdf" : "image/*"),
-              thumb: f.thumb || null,
-              isPdf: !!f.isPdf
-            };
-          });
-
-          var now = new Date().toISOString();
-          var ref = genRef();
-
-          store.addressStatus = "pending";
-          store.submittedAt = now;
-          store.submittedRef = ref;
-          store.files = filesMeta;
-          store.approvedAt = null;
-          store.approvedRef = null;
-          saveStore(store);
-
-          isSubmitting = false;
-          submitBtn.classList.remove("is-loading");
-
-          // Keep object URLs alive for the pending summary view this session.
-          renderPendingView();
-          switchView("pending");
-
-          showToast(
-            "Submission Successful",
-            "Your address documents have been submitted and are now under review."
-          );
-
-          // Scroll the address card into view so the user sees the pending state.
-          try {
-            $("addressCard").scrollIntoView({ behavior: "smooth", block: "center" });
-          } catch (e) {}
-        }, 1300);
-      }
-
-      /* ---------- Simulated reviewer approval (demo) ---------- */
-      function simulateApproval() {
-        store.addressStatus = "completed";
-        store.approvedAt = new Date().toISOString();
-        if (!store.approvedRef) store.approvedRef = store.submittedRef || genRef();
-        saveStore(store);
-        renderDoneView();
-        switchView("completed");
-        showToast("Address Verified", "A reviewer has approved your proof of address (demo).");
-      }
-
-      /* ---------- Reset workflow (demo) ---------- */
-      function resetWorkflow() {
-        store.addressStatus = "awaiting";
-        store.submittedAt = null;
-        store.submittedRef = null;
-        store.files = [];
-        store.approvedAt = null;
-        store.approvedRef = null;
-        saveStore(store);
-        // free any urls
-        sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
-        sessionFiles = [];
-        isSubmitting = false;
-        submitBtn.classList.remove("is-loading");
-        clearError();
-        renderPreviews();
-        switchView("awaiting");
-        showToast("Workflow Reset", "Address verification has been reset. You can upload again.");
-      }
-
-      /* ---------- View switching ---------- */
-      function switchView(state) {
-        uploadView.hidden = state !== "awaiting";
-        pendingView.hidden = state !== "pending";
-        doneView.hidden = state !== "completed";
-
-        // Update the address pill + info tile.
-        updateStatusUI(state);
-      }
-
-      function setPill(text, cls, dot) {
-        addrPill.className = "addr-pill " + cls;
-        addrPill.innerHTML =
-          (dot ? '<span class="pill__dot"></span>' : "") +
-          "<span>" + text + "</span>";
-      }
-
-      function updateStatusUI(state) {
-        if (state === "awaiting") {
-          setPill("Action Required", "addr-pill--action", true);
-          infoAddrTileIcon.className = "info-tile__icon blue";
-          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>';
-          infoAddrValue.textContent = "Awaiting upload";
-          infoAddrHint.textContent = "Upload your proof of address to continue.";
-        } else if (state === "pending") {
-          setPill("Pending Verification", "addr-pill--pending", true);
-          infoAddrTileIcon.className = "info-tile__icon amber";
-          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>';
-          infoAddrValue.textContent = "Pending Verification";
-          infoAddrHint.textContent = "Your documents are under review.";
-        } else {
-          setPill("Verified", "addr-pill--done", true);
-          infoAddrTileIcon.className = "info-tile__icon green";
-          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-          infoAddrValue.textContent = "Verified";
-          infoAddrHint.textContent = "Your proof of address has been approved.";
-        }
-      }
-
-      /* ---------- Render pending view ---------- */
-      function renderPendingView() {
-        $("submittedAt").textContent = formatDateTime(store.submittedAt);
-        $("submittedCount").textContent = String(store.files.length);
-        $("submittedRef").textContent = store.submittedRef || "—";
-        renderDocSummary($("submittedDocs"), store.files, "pending");
-      }
-
-      function renderDoneView() {
-        $("approvedAt").textContent = formatDateTime(store.approvedAt);
-        $("approvedRef").textContent = store.approvedRef || store.submittedRef || "—";
-        renderDocSummary($("approvedDocs"), store.files, "done");
-      }
-
-      function renderDocSummary(container, files, mode) {
-        if (!container) return;
-        container.innerHTML = "";
-        files.forEach(function (f) {
-          var row = document.createElement("div");
-          row.className = "addr-doc-row";
-          var iconHtml;
-          if (f.isPdf || !f.thumb) {
-            iconHtml = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>';
-          } else {
-            iconHtml = '<img alt="" src="' + f.thumb + '">';
-          }
-          row.innerHTML =
-            '<div class="addr-doc-row__icon">' + iconHtml + "</div>" +
-            '<span class="addr-doc-row__name"></span>' +
-            '<span class="addr-doc-row__size"></span>';
-          row.querySelector(".addr-doc-row__name").textContent = f.name;
-          row.querySelector(".addr-doc-row__size").textContent = humanSize(f.size);
-          container.appendChild(row);
-        });
-      }
-
-      /* ---------- Wire up events ---------- */
-      fileInput.addEventListener("change", function () {
-        if (fileInput.files && fileInput.files.length) {
-          addFiles(fileInput.files);
-          fileInput.value = ""; // allow re-adding same file after removal
-        }
       });
+    };
+    loop();
+  }
 
-      // Drag & drop
-      ["dragenter", "dragover"].forEach(function (ev) {
-        dropzone.addEventListener(ev, function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          dropzone.classList.add("is-drag");
-        });
-      });
-      ["dragleave", "drop"].forEach(function (ev) {
-        dropzone.addEventListener(ev, function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          dropzone.classList.remove("is-drag");
-        });
-      });
-      dropzone.addEventListener("drop", function (e) {
-        var dt = e.dataTransfer;
-        if (dt && dt.files && dt.files.length) addFiles(dt.files);
-      });
-      dropzone.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          fileInput.click();
-        }
-      });
+  function removeFile(id) {
+    for (var i = 0; i < sessionFiles.length; i++) {
+      if (sessionFiles[i].id === id) {
+        if (sessionFiles[i].url) URL.revokeObjectURL(sessionFiles[i].url);
+        sessionFiles.splice(i, 1); break;
+      }
+    }
+    if (!sessionFiles.length) clearError();
+    renderPreviews();
+  }
 
-      submitBtn.addEventListener("click", function () {
-        submitAddress();
-      });
-      clearBtn.addEventListener("click", clearAllFiles);
-      simulateApproveBtn.addEventListener("click", simulateApproval);
-      resetBtn.addEventListener("click", resetWorkflow);
+  function clearAllFiles() {
+    sessionFiles.forEach(function(f){ if (f.url) URL.revokeObjectURL(f.url); });
+    sessionFiles = [];
+    clearError();
+    renderPreviews();
+  }
 
-      /* ---------- Init: restore persisted state ---------- */
-      function init() {
-        renderPreviews();
+  /* ── Render previews ───────────────────────────────────────────── */
+  function renderPreviews() {
+    previewGrid.innerHTML = "";
+    var count = sessionFiles.length;
 
-        if (store.addressStatus === "pending") {
-          renderPendingView();
-          switchView("pending");
-        } else if (store.addressStatus === "completed") {
-          // build a done view doc summary container reference
-          renderDoneView();
-          switchView("completed");
-        } else {
-          switchView("awaiting");
-        }
+    sessionFiles.forEach(function(f) {
+      var item = document.createElement("div");
+      item.className = "preview-item";
+
+      if (f.isPdf || !f.url) {
+        var ph = document.createElement("div"); ph.className = "pdf-ph";
+        ph.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg><span>PDF</span>';
+        item.appendChild(ph);
+      } else {
+        var img = document.createElement("img");
+        img.src = f.url; img.alt = f.file.name;
+        item.appendChild(img);
       }
 
-      init();
-    })();
-  </script>
+      var bar = document.createElement("div"); bar.className = "preview-item__bar";
+      bar.innerHTML = '<span class="preview-item__name"></span><span class="preview-item__meta"></span>';
+      bar.querySelector(".preview-item__name").textContent = f.file.name;
+      bar.querySelector(".preview-item__meta").textContent = humanSize(f.file.size) + " · " + extOf(f.file.name);
+      item.appendChild(bar);
+
+      var rm = document.createElement("button");
+      rm.className = "preview-item__remove"; rm.type = "button";
+      rm.setAttribute("aria-label", "Remove " + f.file.name);
+      rm.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      (function(id){ rm.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); removeFile(id); }); })(f.id);
+      item.appendChild(rm);
+
+      previewGrid.appendChild(item);
+    });
+
+    previewEmptyNote.style.display = count ? "none" : "flex";
+    submitBtn.disabled = count === 0;
+    clearBtn.disabled  = count === 0;
+    if (count > 0) { btnCounter.hidden = false; btnCounter.textContent = count; }
+    else           { btnCounter.hidden = true; }
+  }
+
+  /* ── Submit ────────────────────────────────────────────────────── */
+  var isSubmitting = false;
+  function submitAddress() {
+    if (isSubmitting || !sessionFiles.length) return;
+    isSubmitting = true;
+    submitBtn.classList.add("is-loading");
+    submitBtn.disabled = true;
+    clearBtn.disabled  = true;
+
+    window.setTimeout(function() {
+      var filesMeta = sessionFiles.map(function(f){
+        return { id: f.id, name: f.file.name, size: f.file.size,
+                 type: f.file.type || (f.isPdf ? "application/pdf" : "image/*"),
+                 thumb: f.thumb || null, isPdf: !!f.isPdf };
+      });
+      var now = new Date().toISOString(), ref = genRef();
+      store.addressStatus = "pending";
+      store.submittedAt   = now;
+      store.submittedRef  = ref;
+      store.files         = filesMeta;
+      store.approvedAt    = null;
+      store.approvedRef   = null;
+      saveStore(store);
+
+      isSubmitting = false;
+      submitBtn.classList.remove("is-loading");
+      renderPendingView();
+      switchView("pending");
+      showToast("Submitted", "Your address documents are now under review.");
+      try { $("addressCard").scrollIntoView({ behavior: "smooth", block: "center" }); } catch(e) {}
+    }, 1300);
+  }
+
+  /* ── Simulated approval (demo) ─────────────────────────────────── */
+  function simulateApproval() {
+    store.addressStatus = "completed";
+    store.approvedAt    = new Date().toISOString();
+    if (!store.approvedRef) store.approvedRef = store.submittedRef || genRef();
+    saveStore(store);
+    renderDoneView();
+    switchView("completed");
+    showToast("Address Verified (Demo)", "Approval simulated — this is sample data only.");
+  }
+
+  /* ── Reset workflow (demo) ─────────────────────────────────────── */
+  function resetWorkflow() {
+    store.addressStatus = "awaiting";
+    store.submittedAt = store.submittedRef = store.approvedAt = store.approvedRef = null;
+    store.files = [];
+    saveStore(store);
+    sessionFiles.forEach(function(f){ if (f.url) URL.revokeObjectURL(f.url); });
+    sessionFiles = [];
+    isSubmitting = false;
+    submitBtn.classList.remove("is-loading");
+    clearError();
+    renderPreviews();
+    switchView("awaiting");
+    showToast("Reset", "Address verification reset. Upload documents to try again.");
+  }
+
+  /* ── View switching ────────────────────────────────────────────── */
+  function switchView(state) {
+    uploadView.hidden  = state !== "awaiting";
+    pendingView.hidden = state !== "pending";
+    doneView.hidden    = state !== "completed";
+    updateStatusUI(state);
+  }
+
+  function setPill(text, cls) {
+    addrPill.className = "pill addr-pill " + cls;
+    addrPill.innerHTML = '<span class="pill__dot"></span><span>' + text + '</span>';
+  }
+
+  function updateStatusUI(state) {
+    if (state === "awaiting") {
+      setPill("Action Required", "pill--action");
+      summAddrIcon.className = "summ-icon blue";
+      summAddrIcon.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+      infoAddrValue.textContent = "Awaiting upload";
+      infoAddrHint.textContent  = "Upload your proof of address to continue.";
+    } else if (state === "pending") {
+      setPill("Pending Review", "pill--pending");
+      summAddrIcon.className = "summ-icon amber";
+      summAddrIcon.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+      infoAddrValue.textContent = "Pending Review";
+      infoAddrHint.textContent  = "Documents submitted — under review.";
+    } else {
+      setPill("Verified (Demo)", "pill--done");
+      summAddrIcon.className = "summ-icon green";
+      summAddrIcon.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      infoAddrValue.textContent = "Verified — sample data";
+      infoAddrHint.textContent  = "Approval was simulated for demonstration.";
+    }
+  }
+
+  /* ── Render pending / done views ───────────────────────────────── */
+  function renderPendingView() {
+    $("submittedAt").textContent    = fmtDT(store.submittedAt);
+    $("submittedCount").textContent = String(store.files.length);
+    $("submittedRef").textContent   = store.submittedRef || "—";
+    renderDocSummary($("submittedDocs"), store.files);
+  }
+  function renderDoneView() {
+    $("approvedAt").textContent  = fmtDT(store.approvedAt);
+    $("approvedRef").textContent = store.approvedRef || store.submittedRef || "—";
+    renderDocSummary($("approvedDocs"), store.files);
+  }
+  function renderDocSummary(container, files) {
+    if (!container) return;
+    container.innerHTML = "";
+    files.forEach(function(f) {
+      var row = document.createElement("div"); row.className = "addr-doc-row";
+      var iconHtml = (f.isPdf || !f.thumb)
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
+        : '<img alt="" src="' + f.thumb + '">';
+      row.innerHTML = '<div class="addr-doc-row__icon">' + iconHtml + '</div><span class="addr-doc-row__name"></span><span class="addr-doc-row__size"></span>';
+      row.querySelector(".addr-doc-row__name").textContent = f.name;
+      row.querySelector(".addr-doc-row__size").textContent = humanSize(f.size);
+      container.appendChild(row);
+    });
+  }
+
+  /* ── Event wiring ──────────────────────────────────────────────── */
+  fileInput.addEventListener("change", function() {
+    if (fileInput.files && fileInput.files.length) {
+      addFiles(fileInput.files);
+      fileInput.value = "";
+    }
+  });
+
+  // Drag & drop
+  ["dragenter","dragover"].forEach(function(ev) {
+    dropzone.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.add("is-drag");
+    });
+  });
+  ["dragleave","drop"].forEach(function(ev) {
+    dropzone.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.remove("is-drag");
+    });
+  });
+  dropzone.addEventListener("drop", function(e) {
+    var dt = e.dataTransfer;
+    if (dt && dt.files && dt.files.length) addFiles(dt.files);
+  });
+  dropzone.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+  });
+
+  submitBtn.addEventListener("click", submitAddress);
+  clearBtn.addEventListener("click", clearAllFiles);
+  simulateApproveBtn.addEventListener("click", simulateApproval);
+  resetBtn.addEventListener("click", resetWorkflow);
+
+  /* ── Init ──────────────────────────────────────────────────────── */
+  function init() {
+    renderPreviews();
+    if (store.addressStatus === "pending") {
+      renderPendingView(); switchView("pending");
+    } else if (store.addressStatus === "completed") {
+      renderDoneView(); switchView("completed");
+    } else {
+      switchView("awaiting");
+    }
+  }
+  init();
+
+})();
+</script>
 </body>
 </html>
