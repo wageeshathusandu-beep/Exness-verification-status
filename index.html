@@ -96,8 +96,13 @@
     .hdr-title { font-size: 15px; font-weight: 600; color: var(--txt-0); white-space: nowrap; }
     .hdr-sub   { font-size: 11.5px; color: var(--txt-2); }
 
-    /* Compact demo indicator */
-    .hdr-demo {
+    /* Compact demo indicator — hidden in production.
+       To show it in a test/staging environment add the class
+       "demo-env" to the <html> element:
+         document.documentElement.classList.add('demo-env');
+       or set it server-side on the opening <html> tag. */
+    .hdr-demo { display: none; }
+    .demo-env .hdr-demo {
       flex: none;
       display: inline-flex;
       align-items: center;
@@ -113,7 +118,7 @@
       border-radius: 999px;
       white-space: nowrap;
     }
-    .hdr-demo::before {
+    .demo-env .hdr-demo::before {
       content: "";
       width: 6px; height: 6px;
       border-radius: 50%;
