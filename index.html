@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Independent demonstration document verification status dashboard. Not affiliated with or endorsed by Exness." />
+  <meta name="description" content="Independent demonstration document & address verification status dashboard. Not affiliated with or endorsed by Exness." />
   <title>Verification Status · Demo Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
   <style>
@@ -164,18 +164,39 @@
       margin-top: 22px;
       padding: clamp(22px, 5vw, 34px);
       border-radius: var(--radius);
-      background: linear-gradient(160deg, rgba(245, 185, 66, 0.10), rgba(245, 185, 66, 0.02));
-      border: 1px solid rgba(245, 185, 66, 0.22);
       box-shadow: var(--shadow);
       overflow: hidden;
+      transition: background 0.6s var(--ease), border-color 0.6s var(--ease);
     }
-    .hero::after {
+
+    /* Pending (amber) variant */
+    .hero--pending {
+      background: linear-gradient(160deg, rgba(245, 185, 66, 0.10), rgba(245, 185, 66, 0.02));
+      border: 1px solid rgba(245, 185, 66, 0.22);
+    }
+    .hero--pending::after {
       content: "";
       position: absolute;
       inset: -40% auto auto -10%;
       width: 320px;
       height: 320px;
       background: radial-gradient(circle, rgba(245, 185, 66, 0.18), transparent 70%);
+      filter: blur(20px);
+      pointer-events: none;
+    }
+
+    /* Completed (green) variant */
+    .hero--completed {
+      background: linear-gradient(160deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.02));
+      border: 1px solid rgba(16, 185, 129, 0.24);
+    }
+    .hero--completed::after {
+      content: "";
+      position: absolute;
+      inset: -40% auto auto -10%;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.18), transparent 70%);
       filter: blur(20px);
       pointer-events: none;
     }
@@ -220,6 +241,22 @@
       animation: pulse 1.8s var(--ease) infinite;
     }
 
+    /* Completed badge (green) */
+    .badge-completed {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
     .ref-id {
       margin-left: auto;
       font-size: 12.5px;
@@ -253,7 +290,10 @@
       align-items: flex-start;
       gap: 9px;
     }
-    .hero-note svg { flex: none; margin-top: 2px; color: var(--pending); }
+    .hero-note svg { flex: none; margin-top: 2px; }
+    .hero-note.is-pending svg { color: var(--pending); }
+    .hero-note.is-done svg { color: var(--accent); }
+    .hero-note.is-info svg { color: var(--info); }
 
     @keyframes pulse {
       0% { transform: scale(0.85); opacity: 0.9; }
@@ -280,7 +320,9 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 22px;
+      flex-wrap: wrap;
     }
+    .card-head--center { align-items: center; }
     .card-title {
       font-size: clamp(15px, 2.8vw, 17px);
       font-weight: 600;
@@ -309,6 +351,9 @@
       background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 50%, rgba(255, 255, 255, 0.12) 50%);
       border-radius: 2px;
       z-index: 0;
+    }
+    .timeline__line--all-done {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.85), rgba(16, 185, 129, 0.4));
     }
 
     .step {
@@ -416,6 +461,7 @@
     }
     .info-tile__icon.amber { color: var(--pending); border-color: rgba(245, 185, 66, 0.3); }
     .info-tile__icon.blue { color: var(--info); border-color: rgba(59, 130, 246, 0.3); }
+    .info-tile__icon.green { color: var(--accent); border-color: rgba(16, 185, 129, 0.3); }
 
     .info-tile__label {
       font-size: 11.5px;
@@ -477,6 +523,441 @@
     .pill .pill__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
     /* ============================================================
+       Address verification section
+       ============================================================ */
+    .addr-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .addr-pill .pill__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .addr-pill--action {
+      color: var(--info);
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.32);
+    }
+    .addr-pill--pending {
+      color: var(--pending);
+      background: var(--pending-soft);
+      border: 1px solid rgba(245, 185, 66, 0.35);
+    }
+    .addr-pill--done {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(16, 185, 129, 0.32);
+    }
+
+    .addr-desc {
+      color: var(--text-1);
+      font-size: 14.5px;
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    .addr-types {
+      list-style: none;
+      margin: 0 0 18px;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .addr-types li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-1);
+      font-weight: 500;
+    }
+    .addr-types li svg { flex: none; color: var(--accent); }
+
+    /* Dropzone */
+    .dropzone {
+      position: relative;
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 34px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface);
+      transition: border-color 0.3s var(--ease), background 0.3s var(--ease), transform 0.2s var(--ease);
+    }
+    .dropzone:hover,
+    .dropzone:focus-visible {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      outline: none;
+    }
+    .dropzone.is-drag {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: scale(1.01);
+    }
+    .dropzone__icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      color: var(--accent);
+    }
+    .dropzone__text {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-0);
+    }
+    .dropzone__text span { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    .dropzone__hint {
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+
+    /* Preview grid */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .preview-grid:empty { display: none; }
+
+    .preview-item {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-2);
+      aspect-ratio: 4 / 3;
+      animation: rise 0.4s var(--ease);
+    }
+    .preview-item img,
+    .preview-item .pdf-ph {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .preview-item .pdf-ph {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-2);
+      background: linear-gradient(160deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02));
+    }
+    .preview-item .pdf-ph span { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+
+    .preview-item__bar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 7px 9px;
+      background: linear-gradient(180deg, transparent, rgba(7, 9, 15, 0.92));
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-1);
+    }
+    .preview-item__name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+    .preview-item__type {
+      flex: none;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      color: var(--text-2);
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+    }
+
+    .preview-item__remove {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: rgba(7, 9, 15, 0.72);
+      color: var(--text-1);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      backdrop-filter: blur(6px);
+    }
+    .preview-item__remove:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+
+    .preview-empty-note {
+      margin-top: 14px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Buttons */
+    .addr-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-strong);
+      color: var(--text-0);
+      transition: all 0.25s var(--ease);
+    }
+    .btn--primary {
+      background: linear-gradient(145deg, var(--accent), #0ea672);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #04130d;
+      box-shadow: 0 10px 24px -10px rgba(16, 185, 129, 0.6);
+    }
+    .btn--primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px -10px rgba(16, 185, 129, 0.7);
+    }
+    .btn--primary:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn--ghost { background: transparent; }
+    .btn--ghost:hover { background: var(--surface-strong); }
+
+    .btn-counter {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    /* Address pending / done views */
+    .addr-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 14px 10px 6px;
+      animation: rise 0.5s var(--ease);
+    }
+    .addr-state__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+    }
+    .addr-state__icon--pending {
+      color: var(--pending);
+      background: var(--pending-soft);
+      border: 1px solid rgba(245, 185, 66, 0.35);
+      box-shadow: 0 0 0 8px rgba(245, 185, 66, 0.06), 0 0 22px rgba(245, 185, 66, 0.22);
+      animation: glow 2.6s var(--ease) infinite;
+    }
+    .addr-state__icon--done {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.06), 0 0 22px rgba(16, 185, 129, 0.22);
+    }
+    .addr-state__title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+    .addr-state__msg {
+      max-width: 520px;
+      color: var(--text-1);
+      font-size: 14.5px;
+      margin: 0 0 18px;
+      line-height: 1.55;
+    }
+
+    .addr-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .addr-meta__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+    .addr-meta__chip b { color: var(--text-0); font-weight: 600; }
+    .addr-meta__chip svg { color: var(--pending); }
+
+    .addr-doc-summary {
+      width: 100%;
+      max-width: 480px;
+      margin: 4px 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .addr-doc-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .addr-doc-row__icon {
+      flex: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+      overflow: hidden;
+    }
+    .addr-doc-row__icon img { width: 100%; height: 100%; object-fit: cover; }
+    .addr-doc-row__name {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-0);
+      font-weight: 600;
+    }
+    .addr-doc-row__size { flex: none; color: var(--text-2); font-size: 11.5px; }
+
+    /* Demo simulate control */
+    .demo-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px dashed rgba(59, 130, 246, 0.28);
+      font-size: 12.5px;
+      color: var(--text-1);
+      flex-wrap: wrap;
+    }
+    .demo-control svg { flex: none; color: var(--info); }
+    .demo-control .demo-control__text { flex: 1; min-width: 160px; }
+    .demo-control .btn { padding: 9px 16px; font-size: 13px; }
+
+    .view { animation: rise 0.45s var(--ease); }
+    [hidden] { display: none !important; }
+
+    /* ============================================================
+       Toast notification
+       ============================================================ */
+    .toast {
+      position: fixed;
+      top: 22px;
+      left: 50%;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      max-width: calc(100vw - 32px);
+      width: 420px;
+      padding: 16px 18px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(160deg, rgba(16, 185, 129, 0.14), rgba(12, 16, 24, 0.96));
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(16, 185, 129, 0.1);
+      backdrop-filter: blur(14px);
+      transform: translate(-50%, -150%);
+      opacity: 0;
+      transition: transform 0.5s var(--ease), opacity 0.5s var(--ease);
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toast__icon {
+      flex: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent);
+    }
+    .toast__title { font-size: 14.5px; font-weight: 700; color: var(--text-0); margin-bottom: 2px; }
+    .toast__msg { font-size: 13px; color: var(--text-1); line-height: 1.45; }
+    .toast__close {
+      flex: none;
+      background: none;
+      border: none;
+      color: var(--text-2);
+      cursor: pointer;
+      padding: 2px;
+      margin-left: 4px;
+    }
+    .toast__close:hover { color: var(--text-0); }
+
+    /* ============================================================
        Footer / disclaimer
        ============================================================ */
     .disclaimer {
@@ -514,6 +995,8 @@
     .reveal:nth-child(3) { animation-delay: 0.16s; }
     .reveal:nth-child(4) { animation-delay: 0.24s; }
     .reveal:nth-child(5) { animation-delay: 0.32s; }
+    .reveal:nth-child(6) { animation-delay: 0.40s; }
+    .reveal:nth-child(7) { animation-delay: 0.48s; }
     @keyframes rise {
       to { opacity: 1; transform: translateY(0); }
     }
@@ -544,6 +1027,8 @@
       .info-grid { grid-template-columns: 1fr; }
       .ref-id { margin-left: 0; width: 100%; text-align: center; margin-top: 4px; }
       .hero-top { gap: 10px; }
+
+      .toast { width: calc(100vw - 24px); top: 12px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -564,7 +1049,7 @@
         <div class="brand-mark" aria-hidden="true">🛡️</div>
         <div class="brand-text">
           <div class="brand-title">Verification Status</div>
-          <div class="brand-sub">Document Review Dashboard</div>
+          <div class="brand-sub">Document & Address Review Dashboard</div>
         </div>
       </div>
       <span class="demo-badge">Demo</span>
@@ -572,49 +1057,44 @@
 
     <!-- Page title -->
     <div class="page-head">
-      <h1 class="page-title">Document Verification Status</h1>
-      <p class="page-subtitle">Track the progress of your submitted documents in real time.</p>
+      <h1 class="page-title">Verification Status</h1>
+      <p class="page-subtitle">Track the progress of your document and address verification in real time.</p>
     </div>
 
-    <!-- Hero status banner -->
-    <section class="hero reveal" aria-live="polite">
+    <!-- Hero status banner — Document Verification COMPLETED -->
+    <section class="hero hero--completed reveal" aria-live="polite">
       <div class="hero-top">
-        <span class="badge-pending">
-          <span class="dot" aria-hidden="true"></span>
-          Pending
+        <span class="badge-completed">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Completed
         </span>
         <span class="ref-id">Reference <b>#VD-2026-1106-AX9</b></span>
       </div>
 
       <p class="hero-message">
-        Your documents have been successfully submitted and are currently awaiting verification.
+        Your identity documents have been verified successfully.
       </p>
 
-      <div class="hero-note">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M12 7v5l3 2"></path>
-        </svg>
-        <span>Estimated processing time: <strong style="color:var(--text-0)">A few business days.</strong></span>
+      <div class="hero-note is-done">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <span>All document checks passed. Your identity is verified.</span>
       </div>
 
-      <div class="hero-note">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path>
-        </svg>
-        <span>Please wait while our verification team reviews your submitted documents.</span>
+      <div class="hero-note is-info">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
+        <span>Complete <strong style="color:var(--text-0)">Address Verification</strong> below to finalize your account.</span>
       </div>
     </section>
 
     <!-- Progress timeline -->
-    <section class="card reveal" aria-label="Verification progress timeline">
+    <section class="card reveal" aria-label="Document verification progress timeline">
       <div class="card-head">
         <h2 class="card-title">Progress Timeline</h2>
-        <span class="card-helper">2 of 3 steps complete</span>
+        <span class="card-helper">3 of 3 steps complete</span>
       </div>
 
       <div class="timeline">
-        <div class="timeline__line" aria-hidden="true"></div>
+        <div class="timeline__line timeline__line--all-done" aria-hidden="true"></div>
         <div class="timeline__steps">
 
           <!-- Step 1 -->
@@ -644,14 +1124,15 @@
           </div>
 
           <!-- Step 3 -->
-          <div class="step is-active">
+          <div class="step is-done">
             <div class="step__icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+              <svg class="check-tick" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span class="num-tick">3</span>
             </div>
             <div class="step__body">
               <div class="step__name">Verification Status</div>
-              <div class="step__status">Pending</div>
-              <div class="step__meta">In review…</div>
+              <div class="step__status">Completed</div>
+              <div class="step__meta">Nov 6, 14:03</div>
             </div>
           </div>
 
@@ -673,32 +1154,145 @@
         <div class="status-row">
           <span class="status-row__index">3</span>
           <span class="status-row__name">Verification Status</span>
-          <span class="status-row__pill"><span class="pill pill--pending"><span class="pill__dot"></span>Pending</span></span>
+          <span class="status-row__pill"><span class="pill pill--done"><span class="pill__dot"></span>Completed</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Address Verification -->
+    <section class="card reveal" id="addressCard" aria-label="Address verification">
+      <div class="card-head card-head--center">
+        <h2 class="card-title">Address Verification</h2>
+        <span class="addr-pill" id="addrPill"></span>
+      </div>
+
+      <!-- Upload view -->
+      <div id="addrUploadView" class="view">
+        <p class="addr-desc">Upload proof of your residential address to complete verification. We accept clear, legible copies of recent documents (issued within the last 3 months).</p>
+
+        <ul class="addr-types">
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+            Utility bills
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>
+            Bank statements
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            Official address documents
+          </li>
+        </ul>
+
+        <label class="dropzone" id="dropzone" for="fileInput" tabindex="0">
+          <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,application/pdf" hidden />
+          <div class="dropzone__icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <div class="dropzone__text">Drag &amp; drop files here, or <span>browse</span></div>
+          <div class="dropzone__hint">Accepted formats: JPG, PNG &amp; PDF · up to 10MB per file</div>
+        </label>
+
+        <div class="preview-grid" id="previewGrid" aria-live="polite"></div>
+        <div class="preview-empty-note" id="previewEmptyNote">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
+          No documents added yet. Add at least one file to submit.
+        </div>
+
+        <div class="addr-actions">
+          <button class="btn btn--primary" id="submitBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <span>Submit for Verification</span>
+            <span class="btn-counter" id="btnCounter" hidden>0</span>
+          </button>
+          <button class="btn btn--ghost" id="clearBtn" disabled>Clear all</button>
+        </div>
+      </div>
+
+      <!-- Pending view -->
+      <div id="addrPendingView" class="view" hidden>
+        <div class="addr-state">
+          <div class="addr-state__icon addr-state__icon--pending" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+          </div>
+          <h3 class="addr-state__title">Pending Verification</h3>
+          <p class="addr-state__msg">Your address documents have been submitted and are currently under review.</p>
+
+          <div class="addr-meta">
+            <span class="addr-meta__chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+              Submitted <b id="submittedAt">—</b>
+            </span>
+            <span class="addr-meta__chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+              <b id="submittedCount">0</b>&nbsp;documents
+            </span>
+            <span class="addr-meta__chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
+              Reference <b id="submittedRef">—</b>
+            </span>
+          </div>
+
+          <div class="addr-doc-summary" id="submittedDocs"></div>
+
+          <div class="demo-control" id="demoPendingControl">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
+            <span class="demo-control__text">Demo mode: address verification stays pending until an authorized reviewer approves it. Simulate that approval below.</span>
+            <button class="btn btn--primary" id="simulateApproveBtn">Simulate Approval</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed view -->
+      <div id="addrDoneView" class="view" hidden>
+        <div class="addr-state">
+          <div class="addr-state__icon addr-state__icon--done" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h3 class="addr-state__title">Address Verified</h3>
+          <p class="addr-state__msg">Your proof of address has been reviewed and approved. Your account verification is now complete.</p>
+          <div class="addr-meta">
+            <span class="addr-meta__chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Approved <b id="approvedAt">—</b>
+            </span>
+            <span class="addr-meta__chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
+              Reference <b id="approvedRef">—</b>
+            </span>
+          </div>
+          <div class="addr-doc-summary" id="approvedDocs"></div>
+          <div class="demo-control">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path></svg>
+            <span class="demo-control__text">Demo mode: this approval was simulated. You can reset the workflow to try it again.</span>
+            <button class="btn btn--ghost" id="resetBtn">Reset Workflow</button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Info cards -->
     <section class="info-grid reveal">
-      <div class="info-tile">
-        <div class="info-tile__icon amber" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <div class="info-tile" id="infoDocTile">
+        <div class="info-tile__icon green" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
         <div>
-          <div class="info-tile__label">Estimated Time</div>
-          <div class="info-tile__value">A few business days</div>
-          <div class="info-tile__hint">Our team will notify you once the review is finished.</div>
+          <div class="info-tile__label">Document Verification</div>
+          <div class="info-tile__value">Completed</div>
+          <div class="info-tile__hint">Your identity documents have been verified.</div>
         </div>
       </div>
 
-      <div class="info-tile">
+      <div class="info-tile" id="infoAddrTile">
         <div class="info-tile__icon blue" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z"></path></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         </div>
         <div>
-          <div class="info-tile__label">Status</div>
-          <div class="info-tile__value">Awaiting verification</div>
-          <div class="info-tile__hint">No further action needed from you right now.</div>
+          <div class="info-tile__label">Address Verification</div>
+          <div class="info-tile__value" id="infoAddrValue">Awaiting upload</div>
+          <div class="info-tile__hint" id="infoAddrHint">Upload your proof of address to continue.</div>
         </div>
       </div>
     </section>
@@ -711,7 +1305,7 @@
       <span>
         <strong>Disclaimer:</strong> This is an independent demonstration dashboard created for illustrative purposes only.
         It is <strong>not</strong> an official Exness service and is not affiliated with, endorsed by, or connected to Exness.
-        All names, statuses, and reference IDs shown here are sample data.
+        All names, statuses, and reference IDs shown here are sample data. In demo mode, verification approval is simulated and no documents leave your browser.
       </span>
     </aside>
 
@@ -722,19 +1316,487 @@
 
   </div>
 
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="toast__icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="toast__body">
+      <div class="toast__title" id="toastTitle">Submission Successful</div>
+      <div class="toast__msg" id="toastMsg">Your address documents have been submitted for review.</div>
+    </div>
+    <button class="toast__close" id="toastClose" aria-label="Dismiss notification">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
   <script>
-    // Progressive enhancement: subtle "live review" timestamp ticker so the
-    // pending step feels active without changing the displayed statuses.
+    /* ============================================================
+       Verification workflow — client state machine
+       States for address verification: 'awaiting' | 'pending' | 'completed'
+       Demo mode: approval is simulated; documents are persisted locally.
+       ============================================================ */
     (function () {
-      var meta = document.querySelector('.step.is-active .step__meta');
-      if (!meta) return;
-      var seconds = 0;
-      setInterval(function () {
-        seconds += 1;
-        var m = Math.floor(seconds / 60);
-        var s = seconds % 60;
-        meta.textContent = 'In review · ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-      }, 1000);
+      "use strict";
+
+      var STORE_KEY = "exness_demo_addr_verification_v1";
+      var MAX_BYTES = 10 * 1024 * 1024; // 10MB per file
+      var ACCEPT = ["image/jpeg", "image/png", "application/pdf"];
+
+      /* ---------- Persistence (simulated secure backend storage) ---------- */
+      function loadStore() {
+        try {
+          var raw = localStorage.getItem(STORE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+      function saveStore(data) {
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify(data));
+        } catch (e) {
+          /* storage may be full; keep working in-memory */
+        }
+      }
+
+      var store = loadStore();
+      // addressStatus: 'awaiting' | 'pending' | 'completed'
+      if (!store.addressStatus) store.addressStatus = "awaiting";
+      // files: [{id, name, size, type, thumb}]
+      if (!Array.isArray(store.files)) store.files = [];
+      if (!store.submittedAt) store.submittedAt = null;
+      if (!store.submittedRef) store.submittedRef = null;
+      if (!store.approvedAt) store.approvedAt = null;
+      if (!store.approvedRef) store.approvedRef = null;
+
+      // In-memory object URLs for the current session's previews (not persisted wholesale)
+      var sessionFiles = []; // {id, file, url, thumb, isPdf}
+
+      /* ---------- DOM refs ---------- */
+      var $ = function (id) { return document.getElementById(id); };
+
+      var addrPill = $("addrPill");
+      var uploadView = $("addrUploadView");
+      var pendingView = $("addrPendingView");
+      var doneView = $("addrDoneView");
+      var dropzone = $("dropzone");
+      var fileInput = $("fileInput");
+      var previewGrid = $("previewGrid");
+      var previewEmptyNote = $("previewEmptyNote");
+      var submitBtn = $("submitBtn");
+      var clearBtn = $("clearBtn");
+      var btnCounter = $("btnCounter");
+      var toast = $("toast");
+      var toastTitle = $("toastTitle");
+      var toastMsg = $("toastMsg");
+      var toastClose = $("toastClose");
+      var infoAddrValue = $("infoAddrValue");
+      var infoAddrHint = $("infoAddrHint");
+      var infoAddrTileIcon = $("infoAddrTile").querySelector(".info-tile__icon");
+      var simulateApproveBtn = $("simulateApproveBtn");
+      var resetBtn = $("resetBtn");
+
+      /* ---------- Helpers ---------- */
+      function genId() {
+        return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      }
+      function genRef() {
+        var d = new Date();
+        var pad = function (n) { return String(n).padStart(2, "0"); };
+        var stamp = d.getFullYear().toString().slice(2) + pad(d.getMonth() + 1) + pad(d.getDate());
+        var rand = Math.random().toString(36).slice(2, 5).toUpperCase();
+        return "#AV-" + stamp + "-" + rand;
+      }
+      function formatDateTime(iso) {
+        if (!iso) return "—";
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return "—";
+        var pad = function (n) { return String(n).padStart(2, "0"); };
+        var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return months[d.getMonth()] + " " + d.getDate() + ", " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+      }
+      function humanSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+      function extOf(name) {
+        var i = name.lastIndexOf(".");
+        return i >= 0 ? name.slice(i + 1).toUpperCase() : "FILE";
+      }
+
+      /* ---------- Toast ---------- */
+      var toastTimer = null;
+      function showToast(title, msg) {
+        toastTitle.textContent = title;
+        toastMsg.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(hideToast, 5200);
+      }
+      function hideToast() {
+        toast.classList.remove("show");
+        clearTimeout(toastTimer);
+      }
+      toastClose.addEventListener("click", hideToast);
+
+      /* ---------- Thumbnail generation (small data URL, persisted) ---------- */
+      function makeThumb(file) {
+        return new Promise(function (resolve) {
+          if (!file.type.startsWith("image/")) {
+            resolve(null);
+            return;
+          }
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          img.onload = function () {
+            try {
+              var canvas = document.createElement("canvas");
+              var max = 240;
+              var w = img.width, h = img.height;
+              if (w > h) { h = h * max / w; w = max; } else { w = w * max / h; h = max; }
+              canvas.width = Math.max(1, Math.round(w));
+              canvas.height = Math.max(1, Math.round(h));
+              canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL("image/jpeg", 0.7));
+            } catch (e) {
+              resolve(null);
+            } finally {
+              URL.revokeObjectURL(url);
+            }
+          };
+          img.onerror = function () {
+            URL.revokeObjectURL(url);
+            resolve(null);
+          };
+          img.src = url;
+        });
+      }
+
+      /* ---------- Validation ---------- */
+      function isAccepted(file) {
+        return ACCEPT.indexOf(file.type) !== -1 ||
+          /\.(jpe?g|png|pdf)$/i.test(file.name);
+      }
+
+      /* ---------- File handling ---------- */
+      function addFiles(fileList) {
+        var added = 0;
+        var rejected = 0;
+        var oversized = 0;
+        var pending = Array.prototype.slice.call(fileList);
+
+        var loop = function () {
+          if (pending.length === 0) {
+            renderPreviews();
+            if (rejected && oversized) {
+              showToast("Some files skipped", "Unsupported formats or files larger than 10MB were not added.");
+            } else if (rejected) {
+              showToast("Some files skipped", "Only JPG, PNG and PDF files are accepted.");
+            } else if (oversized) {
+              showToast("Some files skipped", "Files larger than 10MB were not added.");
+            } else if (added) {
+              // subtle, no toast needed for normal adds
+            }
+            return;
+          }
+          var file = pending.shift();
+          if (!isAccepted(file)) { rejected++; loop(); return; }
+          if (file.size > MAX_BYTES) { oversized++; loop(); return; }
+
+          makeThumb(file).then(function (thumb) {
+            var id = genId();
+            var isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+            var url = isPdf ? null : URL.createObjectURL(file);
+            sessionFiles.push({ id: id, file: file, url: url, thumb: thumb, isPdf: isPdf });
+            added++;
+            loop();
+          });
+        };
+        loop();
+      }
+
+      function removeFile(id) {
+        for (var i = 0; i < sessionFiles.length; i++) {
+          if (sessionFiles[i].id === id) {
+            if (sessionFiles[i].url) URL.revokeObjectURL(sessionFiles[i].url);
+            sessionFiles.splice(i, 1);
+            break;
+          }
+        }
+        renderPreviews();
+      }
+
+      function clearAllFiles() {
+        sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
+        sessionFiles = [];
+        renderPreviews();
+      }
+
+      /* ---------- Render previews ---------- */
+      function renderPreviews() {
+        previewGrid.innerHTML = "";
+        var count = sessionFiles.length;
+
+        sessionFiles.forEach(function (f) {
+          var item = document.createElement("div");
+          item.className = "preview-item";
+
+          if (f.isPdf || !f.url) {
+            var ph = document.createElement("div");
+            ph.className = "pdf-ph";
+            ph.innerHTML =
+              '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 13h6M9 17h6"></path></svg>' +
+              "<span>PDF</span>";
+            item.appendChild(ph);
+          } else {
+            var img = document.createElement("img");
+            img.src = f.url;
+            img.alt = f.file.name;
+            item.appendChild(img);
+          }
+
+          var bar = document.createElement("div");
+          bar.className = "preview-item__bar";
+          bar.innerHTML =
+            '<span class="preview-item__name"></span>' +
+            '<span class="preview-item__type"></span>';
+          bar.querySelector(".preview-item__name").textContent = f.file.name;
+          bar.querySelector(".preview-item__type").textContent = extOf(f.file.name);
+          item.appendChild(bar);
+
+          var rm = document.createElement("button");
+          rm.className = "preview-item__remove";
+          rm.type = "button";
+          rm.setAttribute("aria-label", "Remove " + f.file.name);
+          rm.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+          (function (id) {
+            rm.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              removeFile(id);
+            });
+          })(f.id);
+          item.appendChild(rm);
+
+          previewGrid.appendChild(item);
+        });
+
+        previewEmptyNote.style.display = count ? "none" : "flex";
+        submitBtn.disabled = count === 0;
+        clearBtn.disabled = count === 0;
+        if (count > 0) {
+          btnCounter.hidden = false;
+          btnCounter.textContent = count;
+        } else {
+          btnCounter.hidden = true;
+        }
+      }
+
+      /* ---------- Submit ---------- */
+      function submitAddress() {
+        if (sessionFiles.length === 0) return;
+
+        // Build persisted file metadata (simulated secure storage).
+        var filesMeta = sessionFiles.map(function (f) {
+          return {
+            id: f.id,
+            name: f.file.name,
+            size: f.file.size,
+            type: f.file.type || (f.isPdf ? "application/pdf" : "image/*"),
+            thumb: f.thumb || null,
+            isPdf: !!f.isPdf
+          };
+        });
+
+        var now = new Date().toISOString();
+        var ref = genRef();
+
+        store.addressStatus = "pending";
+        store.submittedAt = now;
+        store.submittedRef = ref;
+        store.files = filesMeta;
+        store.approvedAt = null;
+        store.approvedRef = null;
+        saveStore(store);
+
+        // Keep object URLs alive for the pending summary view this session.
+        renderPendingView();
+        switchView("pending");
+
+        showToast(
+          "Submission Successful",
+          "Your address documents have been submitted and are now under review."
+        );
+
+        // Scroll the address card into view so the user sees the pending state.
+        try {
+          $("addressCard").scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (e) {}
+      }
+
+      /* ---------- Simulated reviewer approval (demo) ---------- */
+      function simulateApproval() {
+        store.addressStatus = "completed";
+        store.approvedAt = new Date().toISOString();
+        if (!store.approvedRef) store.approvedRef = store.submittedRef || genRef();
+        saveStore(store);
+        renderDoneView();
+        switchView("completed");
+        showToast("Address Verified", "A reviewer has approved your proof of address (demo).");
+      }
+
+      /* ---------- Reset workflow (demo) ---------- */
+      function resetWorkflow() {
+        store.addressStatus = "awaiting";
+        store.submittedAt = null;
+        store.submittedRef = null;
+        store.files = [];
+        store.approvedAt = null;
+        store.approvedRef = null;
+        saveStore(store);
+        // free any urls
+        sessionFiles.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
+        sessionFiles = [];
+        renderPreviews();
+        switchView("awaiting");
+        showToast("Workflow Reset", "Address verification has been reset. You can upload again.");
+      }
+
+      /* ---------- View switching ---------- */
+      function switchView(state) {
+        uploadView.hidden = state !== "awaiting";
+        pendingView.hidden = state !== "pending";
+        doneView.hidden = state !== "completed";
+
+        // Update the address pill + info tile.
+        updateStatusUI(state);
+      }
+
+      function setPill(text, cls, dot) {
+        addrPill.className = "addr-pill " + cls;
+        addrPill.innerHTML =
+          (dot ? '<span class="pill__dot"></span>' : "") +
+          "<span>" + text + "</span>";
+      }
+
+      function updateStatusUI(state) {
+        if (state === "awaiting") {
+          setPill("Action Required", "addr-pill--action", true);
+          infoAddrTileIcon.className = "info-tile__icon blue";
+          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>';
+          infoAddrValue.textContent = "Awaiting upload";
+          infoAddrHint.textContent = "Upload your proof of address to continue.";
+        } else if (state === "pending") {
+          setPill("Pending Verification", "addr-pill--pending", true);
+          infoAddrTileIcon.className = "info-tile__icon amber";
+          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>';
+          infoAddrValue.textContent = "Pending Verification";
+          infoAddrHint.textContent = "Your documents are under review.";
+        } else {
+          setPill("Verified", "addr-pill--done", true);
+          infoAddrTileIcon.className = "info-tile__icon green";
+          infoAddrTileIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+          infoAddrValue.textContent = "Verified";
+          infoAddrHint.textContent = "Your proof of address has been approved.";
+        }
+      }
+
+      /* ---------- Render pending view ---------- */
+      function renderPendingView() {
+        $("submittedAt").textContent = formatDateTime(store.submittedAt);
+        $("submittedCount").textContent = String(store.files.length);
+        $("submittedRef").textContent = store.submittedRef || "—";
+        renderDocSummary($("submittedDocs"), store.files, "pending");
+      }
+
+      function renderDoneView() {
+        $("approvedAt").textContent = formatDateTime(store.approvedAt);
+        $("approvedRef").textContent = store.approvedRef || store.submittedRef || "—";
+        renderDocSummary($("approvedDocs"), store.files, "done");
+      }
+
+      function renderDocSummary(container, files, mode) {
+        if (!container) return;
+        container.innerHTML = "";
+        files.forEach(function (f) {
+          var row = document.createElement("div");
+          row.className = "addr-doc-row";
+          var iconHtml;
+          if (f.isPdf || !f.thumb) {
+            iconHtml = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>';
+          } else {
+            iconHtml = '<img alt="" src="' + f.thumb + '">';
+          }
+          row.innerHTML =
+            '<div class="addr-doc-row__icon">' + iconHtml + "</div>" +
+            '<span class="addr-doc-row__name"></span>' +
+            '<span class="addr-doc-row__size"></span>';
+          row.querySelector(".addr-doc-row__name").textContent = f.name;
+          row.querySelector(".addr-doc-row__size").textContent = humanSize(f.size);
+          container.appendChild(row);
+        });
+      }
+
+      /* ---------- Wire up events ---------- */
+      fileInput.addEventListener("change", function () {
+        if (fileInput.files && fileInput.files.length) {
+          addFiles(fileInput.files);
+          fileInput.value = ""; // allow re-adding same file after removal
+        }
+      });
+
+      // Drag & drop
+      ["dragenter", "dragover"].forEach(function (ev) {
+        dropzone.addEventListener(ev, function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add("is-drag");
+        });
+      });
+      ["dragleave", "drop"].forEach(function (ev) {
+        dropzone.addEventListener(ev, function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove("is-drag");
+        });
+      });
+      dropzone.addEventListener("drop", function (e) {
+        var dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length) addFiles(dt.files);
+      });
+      dropzone.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      submitBtn.addEventListener("click", function () {
+        submitAddress();
+      });
+      clearBtn.addEventListener("click", clearAllFiles);
+      simulateApproveBtn.addEventListener("click", simulateApproval);
+      resetBtn.addEventListener("click", resetWorkflow);
+
+      /* ---------- Init: restore persisted state ---------- */
+      function init() {
+        renderPreviews();
+
+        if (store.addressStatus === "pending") {
+          renderPendingView();
+          switchView("pending");
+        } else if (store.addressStatus === "completed") {
+          // build a done view doc summary container reference
+          renderDoneView();
+          switchView("completed");
+        } else {
+          switchView("awaiting");
+        }
+      }
+
+      init();
     })();
   </script>
 </body>
