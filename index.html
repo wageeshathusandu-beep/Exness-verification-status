@@ -96,36 +96,6 @@
     .hdr-title { font-size: 15px; font-weight: 600; color: var(--txt-0); white-space: nowrap; }
     .hdr-sub   { font-size: 11.5px; color: var(--txt-2); }
 
-    /* Compact demo indicator — hidden in production.
-       To show it in a test/staging environment add the class
-       "demo-env" to the <html> element:
-         document.documentElement.classList.add('demo-env');
-       or set it server-side on the opening <html> tag. */
-    .hdr-demo { display: none; }
-    .demo-env .hdr-demo {
-      flex: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 11px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      color: var(--txt-2);
-      background: var(--surf);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    .demo-env .hdr-demo::before {
-      content: "";
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--blue);
-      box-shadow: 0 0 7px var(--blue);
-    }
-
     /* ── Page heading ─────────────────────────────────────────────── */
     .pg-head { padding: 22px 0 4px; }
     .pg-title {
@@ -570,6 +540,76 @@
     }
     .addr-doc-row__size { flex: none; color: var(--txt-2); font-size: 11.5px; }
 
+    /* ── Uploaded document showcase (demo seed) ──────────────────── */
+    .addr-uploaded {
+      margin-bottom: 18px;
+      padding: 14px 15px;
+      border-radius: var(--r-sm);
+      background: var(--surf);
+      border: 1px solid var(--border);
+    }
+    .addr-uploaded__top {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px;
+    }
+    .addr-uploaded__label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: .6px;
+      color: var(--txt-2); font-weight: 600;
+    }
+    /* Subtle demo tag — clearly marks this as sample data, not a real record */
+    .demo-tag {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
+      font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--txt-2);
+      background: var(--surf-hi);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    .demo-tag::before {
+      content: ""; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--txt-2); opacity: .65;
+    }
+    .addr-uploaded__row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 13px;
+      border-radius: 10px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+    }
+    .addr-uploaded__icon {
+      flex: none; width: 34px; height: 34px;
+      border-radius: 8px;
+      display: grid; place-items: center;
+      background: rgba(59,130,246,.10);
+      border: 1px solid rgba(59,130,246,.28);
+      color: #93c5fd;
+    }
+    .addr-uploaded__main { flex: 1; min-width: 0; }
+    .addr-uploaded__name-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 6px;
+    }
+    .addr-uploaded__name {
+      font-size: 14px; font-weight: 600; color: var(--txt-0);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .addr-uploaded__check {
+      flex: none; width: 20px; height: 20px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--green-soft);
+      border: 1px solid rgba(16,185,129,.4);
+      color: var(--green);
+    }
+    .addr-uploaded__meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    }
+    .addr-uploaded__time { font-size: 11.5px; color: var(--txt-2); }
+    .addr-uploaded__time b { color: var(--txt-1); font-weight: 500; }
+
     /* Demo control strip */
     .demo-strip {
       display: flex; align-items: center;
@@ -712,7 +752,6 @@
         <div class="hdr-sub">Independent demonstration dashboard</div>
       </div>
     </div>
-    <span class="hdr-demo">Demo</span>
   </header>
 
   <!-- ── Page heading ───────────────────────────────────────────── -->
@@ -805,6 +844,45 @@
 
     <!-- Upload view -->
     <div id="addrUploadView" class="view">
+      <!-- Uploaded document showcase (demo seed) -->
+      <div class="addr-uploaded" id="addrUploaded">
+        <div class="addr-uploaded__top">
+          <span class="addr-uploaded__label">Uploaded document</span>
+          <span class="demo-tag">Demo</span>
+        </div>
+
+        <div class="addr-uploaded__row">
+          <!-- PDF icon -->
+          <div class="addr-uploaded__icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M9 13h6M9 17h6"/>
+            </svg>
+          </div>
+
+          <div class="addr-uploaded__main">
+            <div class="addr-uploaded__name-row">
+              <span class="addr-uploaded__name">Utility_Bill.pdf</span>
+              <!-- Green checkmark — document accepted -->
+              <span class="addr-uploaded__check" aria-label="Document received">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </div>
+            <div class="addr-uploaded__meta">
+              <span class="addr-uploaded__time">
+                Uploaded <b>10 November 2026</b> &middot; <b>1:09 PM</b>
+              </span>
+              <span class="pill pill--pending">
+                <span class="pill__dot"></span>Pending Verification
+              </span>
+            </div>
+          </div>
+        </div>
+      </div><!-- /addrUploaded -->
+
       <p class="upload-desc">
         Upload a recent proof of address (issued within the last 3 months).
         We accept clear, legible copies of the document types below.
@@ -1014,6 +1092,7 @@
   var resetBtn        = $("resetBtn");
   var addrError       = $("addrError");
   var addrErrorMsg    = $("addrErrorMsg");
+  var addrUploaded    = $("addrUploaded");
 
   /* ── Helpers ───────────────────────────────────────────────────── */
   function genId() {
@@ -1171,6 +1250,8 @@
     });
 
     previewEmptyNote.style.display = count ? "none" : "flex";
+    // Hide the seeded demo showcase once the user adds their own file(s).
+    if (addrUploaded) addrUploaded.style.display = count ? "none" : "";
     submitBtn.disabled = count === 0;
     clearBtn.disabled  = count === 0;
     if (count > 0) { btnCounter.hidden = false; btnCounter.textContent = count; }
